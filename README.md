@@ -56,3 +56,26 @@ Projeto aprovado: `docs/specs/2026-11-05-anydesk-web-bridge-design.md`.
 ### Diagnóstico de quedas (2026-11-06)
 
 O Windows registrou desconexões RDP com `0x80070040` (transporte de rede indisponível); isso não determina sozinho se houve suspensão, fechamento do cliente ou falha de rede. A ponte continuava escutando em loopback. O túnel SSH anterior estava ausente, sem registro que estabelecesse a causa de sua saída. O gerenciador macOS agora mantém o processo fora do terminal, com keepalive e reinício automático. Isso não reconecta RDP, não desbloqueia o Windows e não reativa controle remoto automaticamente. Se a prévia desconectar, use **Reabrir prévia** ou atualize a página após o túnel voltar.
+
+### Preparar uso sem RDP (validação pendente)
+
+A ponte também pode usar uma sessão gráfica no console local. A transferência
+precisa ser autorizada pelo Windows e faz a área de trabalho aparecer no monitor
+físico. Não é login automático: após logout, reinício ou bloqueio, pode ser
+necessário autenticar novamente. Não desabilite as verificações de sessão da ponte.
+
+Com `ti-it` já logado, execute no Terminal do Mac:
+
+```sh
+ssh -t marcos@10.0.2.141 'C:\Users\marcos\anydesk-web-bridge\.venv\Scripts\python.exe C:\Users\marcos\anydesk-web-bridge\scripts\prepare-console.py'
+```
+
+Informe a senha de **TI-LOCAL\ti-it** somente no prompt do Windows. O script
+verifica a identidade da sessão, recusa substituir outra conta no console e não
+armazena a senha. Permissões de conexão também são exigidas pelo Windows. Caso
+falhe, preserva as sessões e informa o erro, sem tentar elevar privilégios.
+
+A tentativa sem senha em 2026-11-06 retornou erro 1326. A operação autenticada e a
+captura no console ainda precisam ser validadas; não considerar essa preparação
+uma solução já comprovada. O túnel supervisionado e a ponte existentes continuam
+necessários. A reconexão RDP pode voltar a mover a sessão para fora do console.
