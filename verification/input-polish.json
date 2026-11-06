@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-06",
+  "changes": [
+    "Normal pointer previously deployed",
+    "Normalize DOM wheel units and preserve fractional trackpad movement",
+    "Prevent local browser wheel default over remote canvas",
+    "Release bridge-tracked modifiers when pointer event reports them up",
+    "Flush pending mouse movement before button transitions; discard pending moves on release"
+  ],
+  "tests": {
+    "red_green": [
+      "Lost Ctrl keyup before wheel",
+      "Pending movement delivered after drag release"
+    ],
+    "node": [
+      "test_auto_control.cjs",
+      "test_preview_state.cjs"
+    ],
+    "deployment": "Live HTTP app.js matches local bytes"
+  },
+  "limits": [
+    "These regressions verify browser events and WebSocket payloads.",
+    "No new remote text was typed and no remote document was modified during verification.",
+    "Current remote session availability and user-perceived input behavior require live confirmation."
+  ]
+}

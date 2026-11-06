@@ -120,3 +120,10 @@ Pausar controle mantém a pausa até Retomar controle ou uma nova conexão.
 Trocar de aba libera teclas e botões; digitar no campo de destino não rouba foco.
 A autorização do computador remoto e as condições da sessão nativa continuam
 necessárias. O indicador Controle ativo confirma apenas a ponte local.
+
+O cursor usa o ponteiro normal. A rolagem converte unidades de linha/página e
+acumula frações do trackpad antes do envio ao Windows. Gestos sobre a imagem não
+rolam nem ampliam a página local, inclusive quando o controle está pausado.
+Eventos do ponteiro liberam modificadores enviados pela ponte quando o navegador
+informa que já foram soltos. Movimentos pendentes são enviados antes de pressionar
+ou soltar um botão, preservando a sequência de arraste.

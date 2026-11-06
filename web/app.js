@@ -3,6 +3,13 @@ const $ = id => document.getElementById(id);
 const canvas = $('screen'), ctx = canvas.getContext('2d');
 let available = null;
 let controlPaused = false, activationPending = false, autoActivate = true;
+const pressedKeys = new Set();
+let wheelRemainder = 0;
+function syncModifiers(event) {
+ for(const [flag,codes] of [['ctrlKey',['ControlLeft','ControlRight']],['shiftKey',['ShiftLeft','ShiftRight']],['altKey',['AltLeft','AltRight']]]) {
+  if(event[flag] === false) for(const code of codes) if(pressedKeys.has(code)) input({type:'key',code,down:false});
+ }
+}
 function requestControl(fromPointer = false) {
  if(controlPaused || armed || activationPending || !available || !geometry || !lastFrame || performance.now()-lastFrame>=2000 || document.hidden || (document.hasFocus && !document.hasFocus())) return;
  const editing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
@@ -15,9 +22,9 @@ function requestControl(fromPointer = false) {
 function resumeControl() { controlPaused=false; autoActivate=true; canvas.focus({preventScroll:true}); requestControl(); }
 let ws, metadata, geometry, openedAt = 0, lastFrame = 0, armed = false, timer, moving = false, pendingMove;
 function message(text, error = false) { $('message').textContent = text; $('message').classList.toggle('error', error); }
-function setArmed(value) { armed = value; canvas.classList.toggle('control', value); $('control-tag').classList.toggle('active', value); $('control-tag').textContent = value ? 'Controle ativo' : 'Somente visualização'; $('release').disabled = !value; }
+function setArmed(value) { armed = value; if(!value){pressedKeys.clear();wheelRemainder=0;} canvas.classList.toggle('control', value); $('control-tag').classList.toggle('active', value); $('control-tag').textContent = value ? 'Controle ativo' : 'Somente visualização'; $('release').disabled = !value; }
 function send(value) { if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(value)); }
-function release() { activationPending=false; autoActivate=false; send({type:'release'}); setArmed(false); }
+function release() { pendingMove=null; activationPending=false; autoActivate=false; send({type:'release'}); setArmed(false); }
 function blank(title, text) { ctx.clearRect(0,0,canvas.width,canvas.height); canvas.classList.remove('ready'); $('empty').hidden=false; $('empty-title').textContent=title; $('empty-text').textContent=text; geometry=null; lastFrame=0; activationPending=false; autoActivate=true; setArmed(false); }
 async function api(path, body) {
  const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
@@ -66,14 +73,24 @@ $('preview').onclick=openPreview;
 $('logout').onclick=async()=>{release();ws?.close();try{await api('/api/logout',{});}finally{$('workspace').hidden=true;$('login-panel').hidden=false;$('password').focus();}};
 $('fullscreen').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else $('stage').requestFullscreen().catch(()=>message('Tela cheia indisponível.',true));};
 function point(event){const r=canvas.getBoundingClientRect();return{x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};}
-function input(event){if(!controlPaused&&!document.hidden&&(!document.hasFocus||document.hasFocus())&&armed&&geometry&&performance.now()-lastFrame<2000)send({type:'input',geometry,event});}
+function input(event){if(!controlPaused&&!document.hidden&&(!document.hasFocus||document.hasFocus())&&armed&&geometry&&performance.now()-lastFrame<2000){send({type:'input',geometry,event});if(event.type==='key'){if(event.down)pressedKeys.add(event.code);else pressedKeys.delete(event.code);}}}
+function flushMove(){if(pendingMove){const point=pendingMove;pendingMove=null;input({type:'move',...point});}}
 canvas.addEventListener('pointerenter',()=>requestControl(true));
-canvas.addEventListener('pointermove',event=>{requestControl(true);pendingMove=point(event);if(!moving){moving=true;requestAnimationFrame(()=>{moving=false;input({type:'move',...pendingMove});});}});
-canvas.addEventListener('pointerdown',event=>{if(!armed)return;event.preventDefault();canvas.focus({preventScroll:true});canvas.setPointerCapture(event.pointerId);input({type:'button',button:event.button,down:true,...point(event)});});
-canvas.addEventListener('pointerup',event=>{event.preventDefault();input({type:'button',button:event.button,down:false,...point(event)});if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);});
+canvas.addEventListener('pointermove',event=>{requestControl(true);syncModifiers(event);pendingMove=point(event);if(!moving){moving=true;requestAnimationFrame(()=>{moving=false;flushMove();});}});
+canvas.addEventListener('pointerdown',event=>{if(!armed)return;event.preventDefault();syncModifiers(event);flushMove();canvas.focus({preventScroll:true});canvas.setPointerCapture(event.pointerId);input({type:'button',button:event.button,down:true,...point(event)});});
+canvas.addEventListener('pointerup',event=>{event.preventDefault();flushMove();input({type:'button',button:event.button,down:false,...point(event)});if(canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);});
 canvas.addEventListener('pointercancel',release);
 canvas.addEventListener('contextmenu',event=>event.preventDefault());
-canvas.addEventListener('wheel',event=>{if(!armed)return;event.preventDefault();input({type:'wheel',delta:Math.max(-1200,Math.min(1200,event.deltaY)),...point(event)});},{passive:false});
+canvas.addEventListener('wheel',event=>{
+ event.preventDefault();
+ if(!armed){requestControl(true);return;}
+ syncModifiers(event);
+ // DOM deltas use pixels, lines or pages; Windows consumes integer wheel units.
+ const scale=event.deltaMode===1?40:event.deltaMode===2?canvas.height:1;
+ wheelRemainder+=Math.max(-1200,Math.min(1200,event.deltaY*scale));
+ const delta=Math.trunc(wheelRemainder);
+ if(delta){wheelRemainder-=delta;input({type:'wheel',delta:Math.max(-1200,Math.min(1200,delta)),...point(event)});}
+},{passive:false});
 for(const type of ['keydown','keyup'])canvas.addEventListener(type,event=>{if(!armed)return;event.preventDefault();if(event.metaKey||event.code.startsWith('Meta')){release();message('Atalhos do sistema local não são enviados.',true);return;}input({type:'key',code:event.code,down:type==='keydown'});});
 canvas.addEventListener('blur',release);window.addEventListener('blur',release);window.addEventListener('pagehide',()=>{release();ws?.close();});document.addEventListener('visibilitychange',()=>{if(document.hidden)release();});
 api('/api/status').then(showWorkspace).catch(()=>{});
