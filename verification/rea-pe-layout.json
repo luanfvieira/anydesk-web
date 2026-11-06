@@ -1,0 +1,55 @@
+{
+  "sha256": "78c26bc768144343954bce16a074f19a366e747d8c44141538da6d7deda0e9f4",
+  "entry_rva": "0x3653",
+  "image_base": "0x400000",
+  "sections": [
+    {
+      "name": ".text",
+      "virtual_size": 10359,
+      "rva": "0x1000",
+      "raw_size": 10752,
+      "raw_offset": 1024,
+      "entropy": 6.561626260144795
+    },
+    {
+      "name": ".itext",
+      "virtual_size": 18688512,
+      "rva": "0x4000",
+      "raw_size": 0,
+      "raw_offset": 0,
+      "entropy": null
+    },
+    {
+      "name": ".rdata",
+      "virtual_size": 801,
+      "rva": "0x11d7000",
+      "raw_size": 1024,
+      "raw_offset": 11776,
+      "entropy": 5.846309919304836
+    },
+    {
+      "name": ".data",
+      "virtual_size": 5582180,
+      "rva": "0x11d8000",
+      "raw_size": 5581312,
+      "raw_offset": 12800,
+      "entropy": 7.999962720760454
+    },
+    {
+      "name": ".rsrc",
+      "virtual_size": 18552,
+      "rva": "0x172b000",
+      "raw_size": 18944,
+      "raw_offset": 5594112,
+      "entropy": 6.031023270321858
+    },
+    {
+      "name": ".reloc",
+      "virtual_size": 768,
+      "rva": "0x1730000",
+      "raw_size": 1024,
+      "raw_offset": 5613056,
+      "entropy": 1.1700563166805082
+    }
+  ]
+}
