@@ -203,3 +203,35 @@ atual. Esse último destino e as chamadas indiretas ainda não foram resolvidos.
 Portanto, a cadeia foi rastreada até a transição de estado/encaminhamento; não
 se declara um rastreamento completo até o fechamento final do transporte.
 As sessões REA abertas nesta etapa foram fechadas normalmente.
+
+## Correlação com o pareamento e a autenticação
+
+Os registros da sessão do frontend PID 45032, correlacionados com a fiber 159
+do serviço, permitem separar as etapas (horários UTC de 2026-11-06):
+
+| Etapa | Horário |
+| --- | --- |
+| Inicialização da licença `free-1` | 18:22:26.026 |
+| Solicitação de conexão | 18:22:26.176 |
+| Conexão de rede estabelecida | 18:22:27.014 |
+| Mudança para conexão direta concluída | 18:22:27.046 |
+| Solicitação de autenticação | 18:22:27.145 |
+| Sessão autorizada | 18:24:03.753 |
+| Sessão iniciada | 18:24:04.114 |
+| Início do encerramento | 18:29:04.197 |
+| Diálogo de limitação da licença | 18:29:04.431 |
+
+São 300,083 segundos entre o início da sessão e `Stopping session`. A espera de
+aproximadamente 97 segundos pela autenticação não integra esse intervalo. Isso
+sustenta que o corte observado acompanha o tempo de sessão ativa, não o instante
+do primeiro pareamento. A licença local já era identificada como `free-1` antes
+da conexão; isso não exclui atualizações posteriores das propriedades efetivas.
+
+O campo de log `Connection flags: direct paid 3 4` também aparece, mas o significado
+de `paid` nesse campo ainda não foi recuperado. Não é prova de licença paga no
+cliente local nem de direito a sessão ilimitada. A troca para transporte direto
+foi observada e não evitou o encerramento deste caso.
+
+Não foi recuperado do pareamento um artefato que remova o prazo. Esta etapa
+correlaciona registros existentes; não decifra tráfego nem captura credenciais.
+Linha do tempo sanitizada: `verification/pairing-timeline.json`.

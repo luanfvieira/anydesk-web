@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-06",
+  "source": "Existing Windows AnyDesk frontend and service trace records",
+  "frontend_pid": 45032,
+  "service_session_fiber": 159,
+  "destination": "604619388",
+  "timestamps": "UTC",
+  "events": [
+    {
+      "event": "license_initialized_free_1",
+      "time": "18:22:26.026"
+    },
+    {
+      "event": "connection_requested",
+      "time": "18:22:26.176"
+    },
+    {
+      "event": "network_established",
+      "time": "18:22:27.014"
+    },
+    {
+      "event": "direct_switch_completed",
+      "time": "18:22:27.046"
+    },
+    {
+      "event": "authentication_requested",
+      "time": "18:22:27.145"
+    },
+    {
+      "event": "session_granted",
+      "time": "18:24:03.753"
+    },
+    {
+      "event": "session_started",
+      "time": "18:24:04.114"
+    },
+    {
+      "event": "input_allowed",
+      "time": "18:24:04.123"
+    },
+    {
+      "event": "session_stopping",
+      "time": "18:29:04.197"
+    },
+    {
+      "event": "license_limit_dialog",
+      "time": "18:29:04.431"
+    }
+  ],
+  "session_active_seconds_until_stopping": 300.083,
+  "inferences": [
+    "The free-1 license state was initialized before the observed network pairing.",
+    "Observed cutoff aligns with approximately five minutes of active session, excluding authentication wait.",
+    "A direct connection switch did not prevent this observed cutoff."
+  ],
+  "unknowns": [
+    "The log field paid has not been decoded and does not establish paid entitlement.",
+    "Effective timeout origin and whether it is later updated during negotiation remain unknown.",
+    "No reusable artifact that removes the limit was established."
+  ],
+  "scope": "Historical event correlation, not a decrypted packet capture; no credentials retained or application changes made."
+}
