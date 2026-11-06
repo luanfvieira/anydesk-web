@@ -1,7 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const canvas = $('screen'), ctx = canvas.getContext('2d');
-let ws, metadata, geometry, lastFrame = 0, armed = false, timer, moving = false, pendingMove;
+let ws, metadata, geometry, openedAt = 0, lastFrame = 0, armed = false, timer, moving = false, pendingMove;
 function message(text, error = false) { $('message').textContent = text; $('message').classList.toggle('error', error); }
 function setArmed(value) { armed = value; canvas.classList.toggle('control', value); $('control-tag').classList.toggle('active', value); $('control-tag').textContent = value ? 'Controle ativo' : 'Somente visualização'; $('release').disabled = !value; }
 function send(value) { if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(value)); }
@@ -16,14 +16,16 @@ function openPreview() {
  if(ws && ws.readyState<2) return;
  $('preview').hidden=true; $('transport-label').textContent='Abrindo ponte…';
  const current=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`); ws=current; current.binaryType='blob';
- current.onopen=()=>{ $('transport-label').textContent='Ponte ativa'; $('transport-dot').style.background='var(--green)'; $('disconnect').disabled=false; timer=setInterval(()=>{send({type:'ping'});if(lastFrame && performance.now()-lastFrame>2500){release();blank('Imagem interrompida','Confira se a sessão Windows está ativa e o AnyDesk está visível.');}},500); };
+ current.onopen=()=>{openedAt=performance.now(); $('transport-label').textContent='Ponte ativa'; $('transport-dot').style.background='var(--green)'; $('disconnect').disabled=false; timer=setInterval(()=>{send({type:'ping'});if(!lastFrame && performance.now()-openedAt>8000){blank('O Windows não enviou imagem','Verifique se a sessão gráfica está ativa e o AnyDesk está visível. O controle fica suspenso até recebermos uma imagem.');$('activate').disabled=true;}if(lastFrame && performance.now()-lastFrame>2500){release();blank('Imagem interrompida','Confira se a sessão Windows está ativa e o AnyDesk está visível.');}},500); };
  current.onmessage=async event=>{
   if(current!==ws) return;
   if(typeof event.data==='string') {
    const data=JSON.parse(event.data);
    if(data.type==='frame'){metadata=data;return;}
    if(data.type==='status') {
-    $('activate').disabled=!data.available; setArmed(Boolean(data.armed));
+    if(data.windows){const select=$('window-choice');const items=data.windows;const signature=JSON.stringify(items);if(select.dataset.signature!==signature){select.replaceChildren(new Option('Selecione uma janela…',''),...items.map(w=>new Option(w.title||'AnyDesk',w.id)));select.dataset.signature=signature;}select.value=data.selected_window||'';}
+
+    $('activate').disabled=!data.available || !lastFrame || performance.now()-lastFrame>2000; setArmed(Boolean(data.armed));
     if(!data.available) blank('Janela indisponível',data.message);
    }
    if(data.type==='notice'||data.type==='error') {message(data.message,data.type==='error');if(data.type==='error')setArmed(false);}
@@ -39,6 +41,7 @@ function openPreview() {
 }
 $('login-form').onsubmit=async event=>{event.preventDefault();$('login-error').textContent='';try{await api('/api/login',{password:$('password').value});$('password').value='';showWorkspace();}catch(error){$('login-error').textContent=error.message;}};
 $('connect-form').onsubmit=event=>{event.preventDefault();if(ws?.readyState!==WebSocket.OPEN){message('Abra a prévia antes de conectar.',true);return;}release();send({type:'connect',id:$('remote-id').value});};
+$('window-choice').onchange=()=>{release();blank('Abrindo janela','Aguarde a imagem da janela selecionada.');openedAt=performance.now();send({type:'select',window:$('window-choice').value});};
 $('activate').onclick=()=>{send({type:'activate'});canvas.focus({preventScroll:true});};
 $('release').onclick=release;
 $('disconnect').onclick=()=>{release();send({type:'disconnect'});};

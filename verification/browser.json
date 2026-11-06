@@ -1,0 +1,9 @@
+{
+  "login": true,
+  "websocket": true,
+  "frame_ready": true,
+  "logout": true,
+  "mobile_overflow": false,
+  "javascript_errors": [],
+  "remote_connection_tested": false
+}

@@ -27,6 +27,16 @@ class State:
     failures: deque = field(default_factory=deque)
     controller: object = None
     controller_token: str | None = None
+    release_fault: bool = False
+    stopping: bool = False
+    shutdown_event: asyncio.Event = field(default_factory=asyncio.Event)
+
+    def release(self):
+        try:
+            self.release_fault = self.agent.release() is False
+        except Exception:
+            self.release_fault = True
+        return not self.release_fault
 
     def session(self, token):
         now = time.monotonic()
@@ -94,7 +104,7 @@ async def logout(request):
     state = request.app[STATE]
     state.sessions.pop(request[TOKEN], None)
     if state.controller_token == request[TOKEN] and state.controller is not None:
-        state.agent.release()
+        state.release()
         await state.controller.close()
     response = web.json_response({'ok': True})
     response.del_cookie(COOKIE, path='/')
@@ -107,6 +117,8 @@ async def status(request):
 
 async def socket(request):
     state = request.app[STATE]
+    if state.stopping or state.release_fault and not state.release():
+        raise web.HTTPServiceUnavailable(text='Controle indisponível; verifique a sessão Windows.')
     if state.controller is not None:
         raise web.HTTPConflict(text='A ponte já está em uso por outro navegador.')
     ws = web.WebSocketResponse(max_msg_size=4096, heartbeat=5, compress=False)
@@ -132,11 +144,11 @@ async def socket(request):
         try:
             while not ws.closed:
                 now = time.monotonic()
-                if not state.session(request[TOKEN]):
+                if state.stopping or not state.session(request[TOKEN]):
                     await ws.close(code=1008, message=b'Session expired')
                     return
                 if now - last_ping > 2:
-                    state.agent.release()
+                    state.release()
                 if now - last_ping > 5:
                     await ws.close(code=1008, message=b'Heartbeat missing')
                     return
@@ -150,18 +162,18 @@ async def socket(request):
                         sequence += 1
                         outstanding = sequence
                         geometry = frame['geometry']
-                        frame_time = now
+                        frame_time = frame.get('captured_at', now)
                         async with send_lock:
                             await asyncio.wait_for(ws.send_json({'type': 'frame', 'id': sequence,
                                 'width': frame['width'], 'height': frame['height'], 'geometry': geometry}), 2)
                             await asyncio.wait_for(ws.send_bytes(frame['jpeg']), 2)
-                if outstanding is not None and now - frame_time > 2:
-                    state.agent.release()
+                if frame_time and now - frame_time > 2:
+                    state.release()
                 await asyncio.sleep(.1)
         except asyncio.CancelledError:
             raise
         except Exception:
-            state.agent.release()
+            state.release()
             if not ws.closed:
                 try:
                     await emit({'type': 'error', 'message': 'Captura indisponível. Reconecte a prévia.'})
@@ -182,11 +194,11 @@ async def socket(request):
                 rate.popleft()
             rate.append(now)
             if len(rate) > 200:
-                state.agent.release()
+                state.release()
                 await ws.close(code=1008, message=b'Rate exceeded')
                 break
             try:
-                if not state.session(request[TOKEN]):
+                if state.stopping or not state.session(request[TOKEN]):
                     raise ValueError('Sessão expirada. Entre novamente.')
                 data = json.loads(message.data)
                 if not isinstance(data, dict) or not isinstance(data.get('type'), str):
@@ -200,12 +212,22 @@ async def socket(request):
                 elif kind == 'status':
                     await emit({'type': 'status', **state.agent.status()})
                 elif kind == 'release':
-                    state.agent.release()
+                    state.release()
+                elif kind == 'select':
+                    handle = data.get('window')
+                    if not isinstance(handle, str) or not handle.isascii() or not handle.isdigit() or len(handle) > 20:
+                        raise ValueError('Janela inválida.')
+                    state.agent.select_window(int(handle))
+                    geometry = None
+                    outstanding = None
+                    await emit({'type': 'notice', 'message': 'Janela selecionada. Aguarde a imagem.'})
                 elif kind == 'connect':
                     state.agent.connect(validate_id(data.get('id')))
                     geometry = None
                     await emit({'type': 'notice', 'message': 'Solicitação enviada ao AnyDesk. Confira a aceitação na imagem.'})
                 elif kind == 'activate':
+                    if geometry is None or now - frame_time > 2:
+                        raise ValueError('Sem imagem recente do Windows; controle indisponível.')
                     state.agent.activate()
                     await emit({'type': 'status', **state.agent.status()})
                 elif kind == 'input':
@@ -223,11 +245,17 @@ async def socket(request):
                 if kind not in ('ping', 'ack', 'status'):
                     state.sessions[request[TOKEN]] = now
             except (ValueError, TypeError, KeyError, RuntimeError) as error:
-                state.agent.release()
+                state.release()
                 await emit({'type': 'error', 'message': str(error)[:180]})
     finally:
         # Release synchronously: aiohttp can cancel the handler on disconnect.
-        state.agent.release()
+        state.release()
+        if ticker:
+            ticker.cancel()
+        try:
+            state.agent.disconnect()
+        except Exception:
+            state.release_fault = True
         if state.controller is ws:
             state.controller = None
             state.controller_token = None
@@ -235,6 +263,16 @@ async def socket(request):
             ticker.cancel()
             await asyncio.gather(ticker, return_exceptions=True)
     return ws
+
+
+async def shutdown(request):
+    state = request.app[STATE]
+    state.stopping = True
+    if not state.release():
+        state.stopping = False
+        raise web.HTTPServiceUnavailable(text='Windows não confirmou a liberação das entradas; servidor mantido ativo.')
+    asyncio.get_running_loop().call_later(.1, state.shutdown_event.set)
+    return web.json_response({'ok': True, 'input_released': True})
 
 
 async def asset(request):
@@ -249,6 +287,7 @@ def create_app(agent, password, origin):
     app[STATE] = State(agent, hashlib.sha256(password.encode()).digest(), origin.rstrip('/'))
     app.router.add_post('/api/login', login)
     app.router.add_post('/api/logout', logout)
+    app.router.add_post('/api/shutdown', shutdown)
     app.router.add_get('/api/status', status)
     app.router.add_get('/ws', socket)
     app.router.add_get('/', asset)

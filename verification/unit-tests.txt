@@ -2,6 +2,7 @@ test_coordinates_are_finite_normalized (test_policy.PolicyTests.test_coordinates
 test_event_schema_rejects_unknown_and_shell_keys (test_policy.PolicyTests.test_event_schema_rejects_unknown_and_shell_keys) ... ok
 test_geometry_must_be_positive (test_policy.PolicyTests.test_geometry_must_be_positive) ... ok
 test_id_is_only_numeric_address (test_policy.PolicyTests.test_id_is_only_numeric_address) ... ok
+test_acked_last_frame_stall_releases_held_input (test_server.ServerTests.test_acked_last_frame_stall_releases_held_input) ... ok
 test_auth_and_origin_are_required_for_control (test_server.ServerTests.test_auth_and_origin_are_required_for_control) ... ok
 test_expired_session_cannot_send_input (test_server.ServerTests.test_expired_session_cannot_send_input) ... ok
 test_frame_ack_provides_backpressure (test_server.ServerTests.test_frame_ack_provides_backpressure) ... ok
@@ -9,11 +10,21 @@ test_invalid_id_does_not_reach_process_boundary (test_server.ServerTests.test_in
 test_login_throttles_and_logout_revokes (test_server.ServerTests.test_login_throttles_and_logout_revokes) ... ok
 test_logout_closes_controller_and_revokes_cookie (test_server.ServerTests.test_logout_closes_controller_and_revokes_cookie) ... ok
 test_malformed_message_rejected_without_crash (test_server.ServerTests.test_malformed_message_rejected_without_crash) ... ok
+test_no_initial_frame_reports_unavailable_capture (test_server.ServerTests.test_no_initial_frame_reports_unavailable_capture) ... ok
 test_only_one_controller_and_close_releases (test_server.ServerTests.test_only_one_controller_and_close_releases) ... ok
 test_oversized_message_closes_and_releases (test_server.ServerTests.test_oversized_message_closes_and_releases) ... ok
+test_release_failure_cannot_keep_controller_lease (test_server.ServerTests.test_release_failure_cannot_keep_controller_lease) ... ok
+test_shutdown_requires_auth_and_confirmed_release (test_server.ServerTests.test_shutdown_requires_auth_and_confirmed_release) ... ok
+test_socket_close_stops_capture (test_server.ServerTests.test_socket_close_stops_capture) ... ok
 test_stale_geometry_rejected (test_server.ServerTests.test_stale_geometry_rejected) ... ok
+test_window_selection_validates_handle (test_server.ServerTests.test_window_selection_validates_handle) ... ok
+test_activate_brings_selected_window_forward (test_windows.WindowsTests.test_activate_brings_selected_window_forward) ... skipped 'Native adapter regression tests run on Windows'
+test_cached_frame_cannot_refresh_capture_time (test_windows.WindowsTests.test_cached_frame_cannot_refresh_capture_time) ... skipped 'Native adapter regression tests run on Windows'
+test_disconnect_never_closes_unknown_native_window (test_windows.WindowsTests.test_disconnect_never_closes_unknown_native_window) ... skipped 'Native adapter regression tests run on Windows'
+test_release_attempts_all_and_keeps_failed_keys (test_windows.WindowsTests.test_release_attempts_all_and_keeps_failed_keys) ... skipped 'Native adapter regression tests run on Windows'
+test_select_only_verified_anydesk_window (test_windows.WindowsTests.test_select_only_verified_anydesk_window) ... skipped 'Native adapter regression tests run on Windows'
 
 ----------------------------------------------------------------------
-Ran 14 tests in 0.386s
+Ran 25 tests in 3.238s
 
-OK
+OK (skipped=5)

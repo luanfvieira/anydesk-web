@@ -2,7 +2,10 @@
 
 Interface local para usar o AnyDesk do Windows TI-LOCAL pelo navegador do Mac. O AnyDesk original faz a conexão remota; este projeto transmite somente sua janela e encaminha entrada com verificação de foco. Não é um cliente independente do protocolo AnyDesk.
 
-**Estado:** implementação em validação. Login, transporte e regras da API têm testes; captura gráfica e controle real ainda precisam de validação no ambiente. Nenhum teste de conexão com outro ID foi concluído.
+**Estado:** interface, autenticação, transmissão real da janela e ativação do controle na ponte validadas; 25 testes passaram no Windows e o teste de navegador confirmou imagem real, login e logout. A última tentativa para o destino informado mostrou “Dispositivo Offline”. Mouse/teclado de ponta a ponta ainda dependem de o destino voltar a ficar online e aceitar a conexão; não foram declarados validados.
+
+O REA 6.5.0 foi usado para inspecionar o AnyDesk instalado. A ponte usa o aplicativo original e APIs de janela do Windows, sem reconstruir seu protocolo. A captura inicial com PrintWindow falhou no conteúdo; a versão atual usa Windows Graphics Capture por HWND exato.
+
 
 ## Acesso
 
@@ -11,9 +14,9 @@ Interface local para usar o AnyDesk do Windows TI-LOCAL pelo navegador do Mac. O
 3. Abrir **http://127.0.0.1:8765** (usar esse endereço exato).
 4. A senha da aplicação fica em `.runtime/password.txt`. Ela é exclusiva desta ponte e não é a senha do Windows. O arquivo no Windows tem acesso restrito aos usuários envolvidos e administradores; a cópia local deve manter permissão 600.
 5. Informar um ID AnyDesk autorizado e aguardar aceitação no destino. Conferir o estado na imagem: a ponte não interpreta automaticamente a aceitação remota.
-6. Usar **Ativar controle** e manter o canvas em foco. Se o Windows recusar a ativação, selecionar a janela do AnyDesk na sessão Windows. Isso afeta o foco e o mouse de `ti-it`.
+6. Se houver várias janelas, selecionar a sessão desejada em **Janela do AnyDesk**. Usar **Ativar controle** e manter o canvas em foco. Se o Windows recusar a ativação, selecionar a janela do AnyDesk na sessão Windows. Isso afeta o foco e o mouse de `ti-it`.
 
-Para encerrar o controle, usar **Desconectar**. A ponte só solicita fechar uma janela identificada como criada por ela; janelas compartilhadas preexistentes são preservadas. Fechar navegador libera teclas e mouse. Para parar o servidor, executar `scripts\stop-windows.ps1` no Windows. Ctrl+C encerra o túnel no Mac.
+Para encerrar o controle, usar **Desconectar**. Esse botão encerra a transmissão e o controle da ponte. A sessão nativa é preservada: para encerrar a conexão remota, use o próprio AnyDesk. A CLI pode reutilizar processos, portanto a ponte não presume propriedade de janelas novas. Fechar navegador libera teclas e mouse. Para parar o servidor, executar `scripts\stop-windows.ps1` no Windows. Ctrl+C encerra o túnel no Mac.
 
 ## Instalação isolada no Windows
 

@@ -9,7 +9,6 @@ import subprocess
 import time
 
 import win32api
-import win32con
 import win32gui
 import win32process
 import win32ts
@@ -47,6 +46,10 @@ class INPUT(ctypes.Structure):
 
 
 user32.SendInput.argtypes = [wintypes.UINT, ctypes.POINTER(INPUT), ctypes.c_int]
+user32.AttachThreadInput.argtypes = [wintypes.DWORD, wintypes.DWORD, wintypes.BOOL]
+user32.PeekMessageW.argtypes = [ctypes.POINTER(wintypes.MSG), wintypes.HWND, wintypes.UINT, wintypes.UINT, wintypes.UINT]
+user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+user32.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, wintypes.UINT]
 
 
 def send_key(vk, down):
@@ -96,23 +99,54 @@ def windows():
     return result
 
 
+def focus_window(hwnd):
+    """Explicit user activation: share input queues briefly, then always detach."""
+    if not identity(hwnd):
+        return False
+    if win32gui.GetForegroundWindow() == hwnd:
+        return True
+    current = win32api.GetCurrentThreadId()
+    foreground = win32gui.GetForegroundWindow()
+    target_thread = win32process.GetWindowThreadProcessId(hwnd)[0]
+    foreground_thread = win32process.GetWindowThreadProcessId(foreground)[0] if foreground else current
+    message = wintypes.MSG()
+    user32.PeekMessageW(ctypes.byref(message), None, 0, 0, 0)
+    attached = []
+    try:
+        for thread in {target_thread, foreground_thread} - {current}:
+            if user32.AttachThreadInput(current, thread, True):
+                attached.append(thread)
+        # ASYNCWINDOWPOS prevents a hung target UI from blocking this request.
+        user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x4000 | 0x0001 | 0x0002 | 0x0040)
+        user32.SetForegroundWindow(hwnd)
+    finally:
+        for thread in reversed(attached):
+            user32.AttachThreadInput(current, thread, False)
+    return win32gui.GetForegroundWindow() == hwnd
+
+
 def capture_worker(pipe):
     """Capture exactly one HWND with WGC; never enumerate/select a monitor."""
-    print("WGC worker starting", flush=True)
     from windows_capture import WindowsCapture
-    print("WGC imported", flush=True)
     import threading
     dwm = ctypes.WinDLL('dwmapi')
     dwm.DwmGetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD, ctypes.c_void_p, wintypes.DWORD]
     target = None
     control = None
+    last_start = 0
     latest = None
-    diagnosed = False
     lock = threading.Lock()
     try:
         while True:
             hwnd, width, height = pipe.recv()
-            if target != (hwnd, width, height):
+            with lock:
+                cached = latest
+            now = time.monotonic()
+            # WGC emits changes, not a constant-rate video. Request a new actual
+            # capture session for static windows; never refresh a cached timestamp.
+            refresh = bool(control and ((cached is not None and now - cached[-1] > 1)
+                           or (cached is None and now - last_start > 2) or control.is_finished()))
+            if target != (hwnd, width, height) or refresh:
                 if control:
                     control.stop()
                 target = (hwnd, width, height)
@@ -122,15 +156,12 @@ def capture_worker(pipe):
 
                 @capture.event
                 def on_frame_arrived(frame, capture_control):
-                    nonlocal latest, diagnosed
+                    nonlocal latest
                     try:
                         bounds = wintypes.RECT()
                         if dwm.DwmGetWindowAttribute(hwnd, 9, ctypes.byref(bounds), ctypes.sizeof(bounds)) != 0:
                             return
                         rect = (bounds.left, bounds.top, bounds.right, bounds.bottom)
-                        if not diagnosed:
-                            print('WGC geometry:', frame.width, frame.height, rect, win32gui.GetWindowRect(hwnd), win32gui.GetClientRect(hwnd), win32gui.ClientToScreen(hwnd, (0, 0)), flush=True)
-                            diagnosed = True
                         if (frame.width, frame.height) != (rect[2]-rect[0], rect[3]-rect[1]):
                             rect = win32gui.GetWindowRect(hwnd)
                         if (frame.width, frame.height) != (rect[2]-rect[0], rect[3]-rect[1]):
@@ -144,7 +175,7 @@ def capture_worker(pipe):
                         im.thumbnail((1600, 1000))
                         output = BytesIO()
                         im.save(output, format='JPEG', quality=75)
-                        value = (hwnd, width, height, im.width, im.height, output.getvalue())
+                        value = (hwnd, width, height, im.width, im.height, output.getvalue(), time.monotonic())
                         with lock:
                             latest = value
                     except Exception:
@@ -157,8 +188,8 @@ def capture_worker(pipe):
                     with lock:
                         latest = None
 
+                last_start = time.monotonic()
                 control = capture.start_free_threaded()
-                print("WGC started", target, flush=True)
                 # First frame is asynchronous; subsequent requests read a bounded latest-frame cache.
                 time.sleep(.15)
             with lock:
@@ -175,7 +206,6 @@ class WindowsAgent:
     def __init__(self):
         self.hwnd = None
         self.pid = None
-        self.owned = set()
         self.keys = set()
         self.buttons = set()
         self.worker = None
@@ -191,13 +221,13 @@ class WindowsAgent:
 
     def _choose(self):
         candidates = windows()
+        self.candidates = candidates
         if self.before is not None:
             created = [h for h in candidates if h not in self.before]
             if len(created) == 1:
                 self.release()
                 self.hwnd = created[0]
                 self.pid = identity(self.hwnd)
-                self.owned.add((self.hwnd, self.pid))
                 self.before = None
             elif time.monotonic() - self.connect_started > 10:
                 self.before = None
@@ -229,7 +259,9 @@ class WindowsAgent:
         return {'available': available, 'focused': focused, 'armed': self.armed,
                 'title': win32gui.GetWindowText(self.hwnd) if available else '',
                 'size': size, 'message': self.message if available else 'Janela AnyDesk indisponível, minimizada ou sessão bloqueada.',
-                'remote_state': 'unverified'}
+                'remote_state': 'unverified',
+                'selected_window': str(self.hwnd) if self.hwnd else '',
+                'windows': [{'id': str(h), 'title': win32gui.GetWindowText(h)} for h in self.candidates]}
 
     def _reset_worker(self):
         if self.worker:
@@ -257,12 +289,15 @@ class WindowsAgent:
             captured = self.pipe.recv()
             self.pending = None
             if captured:
-                hwnd, w, h, fw, fh, jpeg = captured
-                if hwnd == self.hwnd and (w, h) == (width, height):
+                hwnd, w, h, fw, fh, jpeg, captured_at = captured
+                if time.monotonic() - captured_at > 2:
+                    self.release()
+                    self.geometry = None
+                elif hwnd == self.hwnd and (w, h) == (width, height):
                     self.geometry = (hwnd, self.pid, w, h)
-                    self.last_frame = time.monotonic()
+                    self.last_frame = captured_at
                     result = {'jpeg': jpeg, 'width': fw, 'height': fh,
-                              'geometry': f'{hwnd}:{self.pid}:{w}:{h}'}
+                              'geometry': f'{hwnd}:{self.pid}:{w}:{h}', 'captured_at': captured_at}
         if self.pending and time.monotonic() - self.pending > 10:
             self.release()
             self._reset_worker()
@@ -271,6 +306,16 @@ class WindowsAgent:
             self.pipe.send((self.hwnd, width, height))
             self.pending = time.monotonic()
         return result
+
+    def select_window(self, hwnd):
+        if type(hwnd) is not int or hwnd not in windows() or not identity(hwnd):
+            raise ValueError('Selecione uma janela válida do AnyDesk.')
+        self.release()
+        self._reset_worker()
+        self.hwnd, self.pid = hwnd, identity(hwnd)
+        self.geometry = None
+        self.before = None
+        self.message = 'Janela selecionada. Confira o destino antes de ativar o controle.'
 
     def connect(self, remote_id):
         remote_id = validate_id(remote_id)
@@ -283,13 +328,11 @@ class WindowsAgent:
         self.message = 'Conexão solicitada. Aguarde a aceitação e confira a imagem do AnyDesk.'
 
     def activate(self):
+        if not self.release():
+            raise ValueError('Windows ainda não confirmou a liberação das teclas anteriores.')
         if not self.status()['available']:
             raise ValueError('Janela indisponível.')
-        # Do not steal focus using undocumented Alt-key injection or AttachThreadInput.
-        try:
-            win32gui.SetForegroundWindow(self.hwnd)
-        except Exception:
-            pass
+        focus_window(self.hwnd)
         if win32gui.GetForegroundWindow() != self.hwnd:
             raise ValueError('Clique na janela do AnyDesk no Windows para permitir o controle.')
         self.armed = True
@@ -337,22 +380,23 @@ class WindowsAgent:
         for code in list(self.keys):
             try:
                 send_key(KEYS[code], False)
-            finally:
-                self.keys.discard(code)
+            except Exception:
+                continue  # retain failures for retry; still attempt all other releases
+            self.keys.discard(code)
         for button in list(self.buttons):
             try:
                 send_mouse({0: 4, 1: 64, 2: 16}[button])
-            finally:
-                self.buttons.discard(button)
+            except Exception:
+                continue
+            self.buttons.discard(button)
+        return not self.keys and not self.buttons
 
     def disconnect(self):
         self.release()
-        if self.hwnd and (self.hwnd, self.pid) in self.owned and identity(self.hwnd) == self.pid:
-            win32gui.PostMessage(self.hwnd, win32con.WM_CLOSE, 0, 0)
-            self.owned.discard((self.hwnd, self.pid))
-            self.message = 'Encerramento solicitado à janela criada pela ponte.'
-        else:
-            self.message = 'Controle encerrado. A janela compartilhada do AnyDesk foi preservada.'
+        self._reset_worker()
+        # AnyDesk CLI can forward to a pre-existing process. A new HWND is not proof
+        # of ownership, so closing native sessions is deliberately left to AnyDesk.
+        self.message = 'Controle encerrado. A sessão nativa do AnyDesk foi preservada; encerre-a no próprio AnyDesk.'
         self.before = None
         self.geometry = None
 

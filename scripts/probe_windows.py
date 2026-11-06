@@ -1,5 +1,6 @@
 """Run inside the approved session; never connects to a remote ID."""
 import json
+import argparse
 from pathlib import Path
 import time
 from PIL import Image, ImageStat
@@ -9,7 +10,14 @@ from bridge.windows import WindowsAgent
 
 def main():
     root = Path(__file__).resolve().parents[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hwnd', type=int)
+    args = parser.parse_args()
     agent = WindowsAgent()
+    if args.hwnd:
+        from bridge.windows import identity
+        assert identity(args.hwnd), 'Selected window is not AnyDesk'
+        agent.hwnd, agent.pid = args.hwnd, identity(args.hwnd)
     try:
         status = agent.status()
         if agent.hwnd:
@@ -30,11 +38,6 @@ def main():
             win32gui.EnumWindows(visit,None)
             print(json.dumps({'candidates':windows(),'windows':details,'session':win32ts.ProcessIdToSessionId(os.getpid())}), flush=True)
         assert status['available'], status
-        try:
-            agent.activate()
-            print('Activation:', agent.status(), flush=True)
-        except ValueError as error:
-            print('Activation refused:', str(error), flush=True)
         frame = None
         deadline = time.monotonic() + 20
         while frame is None and time.monotonic() < deadline:

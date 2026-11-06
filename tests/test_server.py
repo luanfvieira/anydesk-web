@@ -147,3 +147,67 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(.1)
         self.assertEqual(self.agent.events, [])
         await ws.close()
+
+    async def test_acked_last_frame_stall_releases_held_input(self):
+        await self.login()
+        ws = await self.ws()
+        first = await self.until(ws, 'frame')
+        await ws.send_json({'type': 'input', 'geometry': first['geometry'], 'event': {'type': 'key', 'code': 'KeyA', 'down': True}})
+        await ws.send_json({'type': 'ack', 'id': first['id']})
+        await asyncio.sleep(.02)
+        self.agent.frame = lambda: None
+        baseline = self.agent.releases
+        for _ in range(6):
+            await ws.send_json({'type': 'ping'})
+            await asyncio.sleep(.45)
+        self.assertGreater(self.agent.releases, baseline)
+        await ws.close()
+
+    async def test_release_failure_cannot_keep_controller_lease(self):
+        await self.login()
+        ws = await self.ws()
+        def broken_release():
+            raise RuntimeError('OS release rejected')
+        self.agent.release = broken_release
+        await ws.close()
+        await asyncio.sleep(.05)
+        self.assertIsNone(self.app[STATE].controller)
+
+    async def test_shutdown_requires_auth_and_confirmed_release(self):
+        self.assertEqual((await self.client.post('/api/shutdown', headers=self.headers)).status, 401)
+        await self.login()
+        self.agent.release = lambda: False
+        self.assertEqual((await self.client.post('/api/shutdown', headers=self.headers)).status, 503)
+        self.agent.release = lambda: True
+        self.assertEqual((await self.client.post('/api/shutdown', headers=self.headers)).status, 200)
+
+    async def test_no_initial_frame_reports_unavailable_capture(self):
+        self.agent.frame = lambda: None
+        await self.login()
+        ws = await self.ws()
+        await ws.send_json({'type': 'activate'})
+        data = await self.until(ws, 'error')
+        self.assertIn('imagem', data['message'].lower())
+        await ws.close()
+
+    async def test_socket_close_stops_capture(self):
+        stopped = []
+        self.agent.disconnect = lambda: stopped.append(True)
+        await self.login()
+        ws = await self.ws()
+        await ws.close()
+        await asyncio.sleep(.05)
+        self.assertEqual(stopped, [True])
+
+    async def test_window_selection_validates_handle(self):
+        self.agent.select_window = lambda hwnd: setattr(self.agent, 'selection', hwnd)
+        await self.login()
+        ws = await self.ws()
+        await self.until(ws, 'notice')
+        await ws.send_json({'type': 'select', 'window': '123'})
+        await self.until(ws, 'notice')
+        self.assertEqual(self.agent.selection, 123)
+        await ws.send_json({'type': 'select', 'window': '123;calc'})
+        await self.until(ws, 'error')
+        self.assertEqual(self.agent.selection, 123)
+        await ws.close()

@@ -1,0 +1,14 @@
+{
+  "frames_received": 2,
+  "bridge_activation": true,
+  "remote_keyboard_mouse_tested": false,
+  "dimensions": [
+    990,
+    492
+  ],
+  "content_stddev": [
+    29.934767851901753,
+    21.158421705710207,
+    20.927423176908366
+  ]
+}
