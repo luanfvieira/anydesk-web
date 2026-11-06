@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-06",
+  "change": "Automatic browser control after fresh frame, resume on pointer return, explicit pause preserved",
+  "rea": {
+    "keyboard": {
+      "evidence_id": "ev_53934f9361e1c4740cc85d98843102643c71f01d5090c4328e256c1161a1a0a6",
+      "defined_string_matches": 46
+    },
+    "mouse": {
+      "evidence_id": "ev_17df4896a8202bff03e29a1042c261038a7af98af3aec276e6b763a63e30a86a",
+      "defined_string_matches": 28
+    },
+    "input": {
+      "evidence_id": "ev_92f9e4df9f2e8d1e4210862b766925613f38f336c3985e09be2caa057b2202aa",
+      "defined_string_matches": 0
+    }
+  },
+  "rea_scope": "Previously reconstructed selected-code artifact; string references identify input features but do not prove event delivery. No native patch or config modification.",
+  "native_input_probe": {
+    "window": 1185610,
+    "process": 36072,
+    "tab_sendinput_returned_success": true,
+    "mouse_ok_sendinput_returned_success": true,
+    "result": "Native log confirms connection quit and frontend shutdown at 2026-11-06 17:50:49 UTC after OK click. Post-click frame unavailable because the window closed.",
+    "precondition": "Compared fresh window image with previously inspected license-ended dialog before sending test input."
+  },
+  "limitations": [
+    "The current native session had already ended with a license limitation message.",
+    "Remote typing and clicking end-to-end remain unverified.",
+    "Matching process integrity levels do not rule out every Windows or AnyDesk input restriction."
+  ],
+  "checks": {
+    "frontend": "Both Node regression scripts passed; JS syntax valid",
+    "local_python": "29 tests, 6 Windows-only skips",
+    "windows_existing_suite": "26 tests passed",
+    "deployment": "Live HTTP JS and HTML bytes match local files"
+  }
+}

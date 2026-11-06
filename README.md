@@ -111,3 +111,12 @@ Validação após recuperação: imagem inspecionada em RDP e console, 86 frames
 nenhuma tecla/clique remoto enviado. Não confundir ativação na ponte com teste
 de controle de um computador remoto. Evidência resumida em
 `verification/console-recovery.json`; imagens e credenciais ficam fora do Git.
+
+### Controle automático no portal
+
+A imagem recente habilita automaticamente o controle, com confirmação da ponte.
+Ao voltar o ponteiro para a imagem, o controle é retomado sem exigir um botão.
+Pausar controle mantém a pausa até Retomar controle ou uma nova conexão.
+Trocar de aba libera teclas e botões; digitar no campo de destino não rouba foco.
+A autorização do computador remoto e as condições da sessão nativa continuam
+necessárias. O indicador Controle ativo confirma apenas a ponte local.
