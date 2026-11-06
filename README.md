@@ -10,13 +10,13 @@ O REA 6.5.0 foi usado para inspecionar o AnyDesk instalado. A ponte usa o aplica
 ## Acesso
 
 1. No Windows, executar PowerShell como administrador na pasta do projeto: `scripts\start-windows.ps1`. A tarefa usa o usuário interativo `TI-LOCAL\ti-it`, sem guardar sua senha e sem inicialização automática no boot.
-2. No Mac, executar `./scripts/tunnel.sh` e manter o terminal aberto.
+2. No Mac, executar `python3 scripts/tunnel-macos.py start`. O macOS mantém o túnel nesta sessão de login e reinicia o SSH se ele encerrar. Após sair da conta ou reiniciar o Mac, execute novamente. Consulte com `status` e pare com `stop`. Para uso manual em primeiro plano, `./scripts/tunnel.sh` continua disponível; não execute os dois modos juntos.
 3. Abrir **http://127.0.0.1:8765** (usar esse endereço exato).
 4. A senha da aplicação fica em `.runtime/password.txt`. Ela é exclusiva desta ponte e não é a senha do Windows. O arquivo no Windows tem acesso restrito aos usuários envolvidos e administradores; a cópia local deve manter permissão 600.
 5. Informar um ID AnyDesk autorizado e aguardar aceitação no destino. Conferir o estado na imagem: a ponte não interpreta automaticamente a aceitação remota.
 6. Se houver várias janelas, selecionar a sessão desejada em **Janela do AnyDesk**. Usar **Ativar controle** e manter o canvas em foco. Se o Windows recusar a ativação, selecionar a janela do AnyDesk na sessão Windows. Isso afeta o foco e o mouse de `ti-it`.
 
-Para encerrar o controle, usar **Desconectar**. Esse botão encerra a transmissão e o controle da ponte. A sessão nativa é preservada: para encerrar a conexão remota, use o próprio AnyDesk. A CLI pode reutilizar processos, portanto a ponte não presume propriedade de janelas novas. Fechar navegador libera teclas e mouse. Para parar o servidor, executar `scripts\stop-windows.ps1` no Windows. Ctrl+C encerra o túnel no Mac.
+Para encerrar o controle, usar **Desconectar**. Esse botão encerra a transmissão e o controle da ponte. A sessão nativa é preservada: para encerrar a conexão remota, use o próprio AnyDesk. A CLI pode reutilizar processos, portanto a ponte não presume propriedade de janelas novas. Fechar navegador libera teclas e mouse. Para parar o servidor, executar `scripts\stop-windows.ps1` no Windows. No modo supervisionado, `python3 scripts/tunnel-macos.py stop` encerra o túnel. No modo manual, use Ctrl+C.
 
 ## Instalação isolada no Windows
 
@@ -52,3 +52,7 @@ node --check web/app.js
 O limite do sistema operacional é substituído por um adaptador de teste na suíte HTTP. Isso verifica autenticação, exclusividade, validação e limpeza, **não prova captura ou controle reais**. `scripts/probe_windows.py` testa a captura dentro da sessão Windows; `scripts/check_browser.py` verifica navegador e túnel usando uma cópia local da credencial. Este último exige Playwright e o Google Chrome no Mac. Os testes não iniciam uma conexão AnyDesk remota.
 
 Projeto aprovado: `docs/specs/2026-11-05-anydesk-web-bridge-design.md`.
+
+### Diagnóstico de quedas (2026-11-06)
+
+O Windows registrou desconexões RDP com `0x80070040` (transporte de rede indisponível); isso não determina sozinho se houve suspensão, fechamento do cliente ou falha de rede. A ponte continuava escutando em loopback. O túnel SSH anterior estava ausente, sem registro que estabelecesse a causa de sua saída. O gerenciador macOS agora mantém o processo fora do terminal, com keepalive e reinício automático. Isso não reconecta RDP, não desbloqueia o Windows e não reativa controle remoto automaticamente. Se a prévia desconectar, use **Reabrir prévia** ou atualize a página após o túnel voltar.
