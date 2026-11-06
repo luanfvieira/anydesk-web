@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-06",
+  "finding": "The compared Windows portal and Mac native attempts used different destination IDs.",
+  "windows": {
+    "destination": "604629388",
+    "source": "C:/ProgramData/AnyDesk/ad_svc.trace",
+    "attempts_utc": [
+      "2026-11-06T15:01:14.326Z",
+      "2026-11-06T15:02:22.490Z"
+    ],
+    "outcome": "Client appears to be offline.",
+    "result_times_utc": [
+      "2026-11-06T15:01:14.605Z",
+      "2026-11-06T15:02:22.806Z"
+    ]
+  },
+  "mac": {
+    "destination": "604619388",
+    "source": "~/.anydesk/anydesk.trace",
+    "attempt_utc": "2026-11-06T15:01:25.075Z",
+    "network_established_utc": "2026-11-06T15:01:26.465Z",
+    "session_granted_utc": "2026-11-06T15:01:27.172Z",
+    "session_started_utc": "2026-11-06T15:01:27.216Z"
+  },
+  "limits": [
+    "Historical comparison; no new outgoing session initiated by this investigation.",
+    "Does not establish current availability or prove that 604619388 is the intended destination without user confirmation.",
+    "No portal ID rewriting or native binary changes made.",
+    "CRL DNS errors observed separately; not established as cause of the offline response."
+  ]
+}

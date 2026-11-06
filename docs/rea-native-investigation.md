@@ -127,3 +127,33 @@ Binários e pseudocódigo integral permanecem somente em `.runtime/`, fora do Gi
 O próximo ponto de investigação é quem produz o estado recebido por esse
 tratador de interface. Ainda não sabemos por que o destino `604629388` foi
 considerado offline, nem demonstramos conexão independente do cliente nativo.
+
+## Comparação dos logs: destinos diferentes (2026-11-06)
+
+A investigação seguinte encontrou uma divergência concreta entre o teste do portal
+no Windows e a conexão nativa no Mac, separados por cerca de 11 segundos:
+
+| Origem | ID solicitado | Horário UTC | Resultado |
+| --- | --- | --- | --- |
+| Windows/portal | `604629388` | 15:01:14 | Cliente informado como offline |
+| Mac/nativo | `604619388` | 15:01:25 | Rede estabelecida; sessão autorizada e iniciada às 15:01:27 |
+| Windows/portal | `604629388` | 15:02:22 | Cliente informado como offline novamente |
+
+O quinto dígito difere: `2` no Windows e `1` no Mac. O log do serviço Windows
+confirma que recebeu exatamente o ID fornecido ao portal. O log do Mac confirma
+`Net connection established`, `Session granted` e `Session started` para o outro
+ID. Assim, os testes anteriores não comparavam o mesmo destino. A conclusão
+anterior de causa desconhecida permanece válida para a indisponibilidade do ID
+`604629388` em si, mas a discrepância entre a conexão que funcionou no Mac e a
+que falhou no portal tem agora uma explicação documentada: IDs distintos.
+
+Para comparar os clientes, o teste no portal deve usar o destino pretendido
+confirmado pelo usuário; o ID com sessão bem-sucedida no Mac foi `604619388`.
+Não houve nova solicitação de conexão nesta investigação nem substituição
+automática do ID. Os registros históricos não garantem disponibilidade atual.
+
+O serviço Windows permanecia em execução e com conexão TCP estabelecida ao
+relay durante a inspeção. Também existem falhas de resolução de
+`crl.anydesk.com`, mas não foi demonstrada relação causal com esse aviso offline.
+Resumo sanitizado: `verification/offline-id-comparison.json`. Nenhum código da
+ponte, configuração de rede ou binário AnyDesk foi alterado nesta etapa.
