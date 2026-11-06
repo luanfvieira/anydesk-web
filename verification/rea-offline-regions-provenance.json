@@ -1,0 +1,23 @@
+{
+  "parent_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+  "artifact_sha256": "99d7dc07fea436026b679cdadf7287d720d4658f77fd743db52fb25fed1b8503",
+  "retained_code_ranges": [
+    {
+      "start": "0xfe8000",
+      "end_exclusive": "0x1000000"
+    },
+    {
+      "start": "0x1100000",
+      "end_exclusive": "0x1110000"
+    },
+    {
+      "start": "0x16e0000",
+      "end_exclusive": "0x16f0000"
+    }
+  ],
+  "limitations": [
+    "Only selected executable regions are mapped; all other code addresses are absent.",
+    "Read-only data retained; prior writable data omissions still apply.",
+    "Local function/reference investigation only. Missing callees expected. Not executable."
+  ]
+}

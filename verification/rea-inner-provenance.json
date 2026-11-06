@@ -1,0 +1,48 @@
+{
+  "parent_sha256": "dde651807bafd9a17344122f05cb27c558e7631a74a48dd313c8beb09a90a892",
+  "artifact_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+  "image_base": "0xeb4000",
+  "entry_rva": "0x83b755",
+  "sections": [
+    {
+      "name": ".text",
+      "rva": "0x1000",
+      "raw_size": 9415680,
+      "flags": "0x60000020",
+      "note": "Copied from previously recorded mapped image."
+    },
+    {
+      "name": ".rdata",
+      "rva": "0x8fc000",
+      "raw_size": 7321600,
+      "flags": "0x40000040",
+      "note": "Copied from previously recorded mapped image."
+    },
+    {
+      "name": ".data",
+      "rva": "0xff8000",
+      "raw_size": 1169408,
+      "flags": "0xc0000040",
+      "note": "Writable non-executable pages were omitted/zero-filled upstream; data is incomplete."
+    },
+    {
+      "name": ".rodata",
+      "rva": "0x1122000",
+      "raw_size": 3584,
+      "flags": "0x40000040",
+      "note": "Copied from previously recorded mapped image."
+    },
+    {
+      "name": ".reloc",
+      "rva": "0x1123000",
+      "raw_size": 646144,
+      "flags": "0x42000040",
+      "note": "Copied from previously recorded mapped image."
+    }
+  ],
+  "limitations": [
+    "Analysis-only reconstructed inner PE; never execute.",
+    "Writable non-executable runtime pages omitted, data/import/indirect-call observations may be incomplete.",
+    "Loaded absolute addresses retained and relocation directory cleared; not original source."
+  ]
+}

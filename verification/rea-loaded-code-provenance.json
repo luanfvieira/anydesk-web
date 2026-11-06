@@ -1,0 +1,78 @@
+{
+  "source_sha256": "78c26bc768144343954bce16a074f19a366e747d8c44141538da6d7deda0e9f4",
+  "pid": 15880,
+  "module_base": "0xeb0000",
+  "sections": [
+    {
+      "name": ".text",
+      "rva": "0x1000",
+      "bytes": 10359,
+      "sha256": "ef71893e8fcc9d2a11bb5386575ff38c00a89a7daa6f2112403bb4ee0172a7f1",
+      "ranges": [
+        {
+          "rva": "0x1000",
+          "size": 10359,
+          "protection": "0x20",
+          "copied": true
+        }
+      ]
+    },
+    {
+      "name": ".itext",
+      "rva": "0x4000",
+      "bytes": 18688512,
+      "sha256": "c28027cd849c0a5dd2776020323dc365e777714e40dc253c431f1d563dfd47bf",
+      "ranges": [
+        {
+          "rva": "0x4000",
+          "size": 4096,
+          "protection": "0x40",
+          "copied": true
+        },
+        {
+          "rva": "0x5000",
+          "size": 9416704,
+          "protection": "0x20",
+          "copied": true
+        },
+        {
+          "rva": "0x900000",
+          "size": 7323648,
+          "protection": "0x2",
+          "copied": true
+        },
+        {
+          "rva": "0xffc000",
+          "size": 1171456,
+          "protection": "0x4",
+          "copied": false
+        },
+        {
+          "rva": "0x111a000",
+          "size": 49152,
+          "protection": "0x40",
+          "copied": true
+        },
+        {
+          "rva": "0x1126000",
+          "size": 4096,
+          "protection": "0x2",
+          "copied": true
+        },
+        {
+          "rva": "0x1127000",
+          "size": 719360,
+          "protection": "0x40",
+          "copied": true
+        }
+      ]
+    }
+  ],
+  "artifact_sha256": "dde651807bafd9a17344122f05cb27c558e7631a74a48dd313c8beb09a90a892",
+  "limitations": [
+    "Hybrid analysis-only PE: executable and read-only pages in .text/.itext copied from running module; other runtime pages are explicit zero-filled holes; all other sections retain original disk bytes.",
+    "Not a full unpacked executable; data references, import resolution, relocation and entry semantics may be incomplete.",
+    "No heap, stacks, other modules or writable non-executable runtime pages captured. Whole PE is hybrid, never suitable for execution.",
+    "Original binary and running process were not modified; artifact must not be executed."
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-06",
+  "provider": "REA 6.5.0 / Ghidra 12.1.4",
+  "artifact_sha256": "99d7dc07fea436026b679cdadf7287d720d4658f77fd743db52fb25fed1b8503",
+  "scope": "Selected executable regions and retained read-only data; not whole-program analysis",
+  "procedure_count": 1251,
+  "string_count": 13317,
+  "message_key": "ad.dlg.closed.client_offline.message",
+  "message_address": "0x1dce3b8",
+  "xrefs": [
+    "0xff1f04",
+    "0xff20b4",
+    "0x11088e2"
+  ],
+  "evidence_ids": {
+    "regions-overview": "ev_60da142cecd945fcc9b252c86852e9df6e73733da373c5e3a7d0b192c8a88f8e",
+    "regions-offline-xrefs": "ev_07620d47ad0331fae80c3ac5672b7ce7353dbd631f5ece764ba3b0a2d3c088c5",
+    "regions-pseudocode-0": "ev_a7a9b5546aaca6f544c2ca6d925d0893b249ba139f39fa08511946d97210fdce",
+    "regions-pseudocode-2": "ev_80fa679363711cf3c1b6e810e5fcc3eba7aabe29c216e293b26397a4d780545b"
+  },
+  "procedures": [
+    "0xff1b90",
+    "0x1108880"
+  ],
+  "findings": [
+    "One branch of FUN_00ff1b90 selects the offline title when param_4 equals 0x0c. Interpretation depends on surrounding state: another branch with that same value selects retry_limit_reached.",
+    "FUN_01108880 references the offline message and title while constructing the dialog."
+  ],
+  "limitations": [
+    "Full inner-PE analysis reached provider timeout after 600000 ms.",
+    "Missing code regions, writable data and inferred calling conventions limit interpretation.",
+    "0x0c is not established as a universal transport or protocol error.",
+    "Root cause of target availability and independent AnyDesk protocol compatibility remain unproven.",
+    "No installed binary, licensing behavior or bridge application code changed."
+  ]
+}
