@@ -24,6 +24,8 @@ user32.PrintWindow.argtypes = [wintypes.HWND, wintypes.HDC, wintypes.UINT]
 user32.OpenInputDesktop.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
 user32.OpenInputDesktop.restype = wintypes.HANDLE
 user32.CloseDesktop.argtypes = [wintypes.HANDLE]
+user32.IsHungAppWindow.argtypes = [wintypes.HWND]
+user32.IsHungAppWindow.restype = wintypes.BOOL
 
 
 class MI(ctypes.Structure):
@@ -250,7 +252,8 @@ class WindowsAgent:
 
     def status(self):
         self._choose()
-        available = bool(self.hwnd and win32gui.IsWindowVisible(self.hwnd)
+        hung = bool(self.hwnd and user32.IsHungAppWindow(self.hwnd))
+        available = bool(self.hwnd and not hung and win32gui.IsWindowVisible(self.hwnd)
                          and not win32gui.IsIconic(self.hwnd) and self._desktop_ready())
         focused = bool(available and win32gui.GetForegroundWindow() == self.hwnd)
         if not focused:
@@ -258,7 +261,7 @@ class WindowsAgent:
         size = list(win32gui.GetClientRect(self.hwnd)[2:]) if available else None
         return {'available': available, 'focused': focused, 'armed': self.armed,
                 'title': win32gui.GetWindowText(self.hwnd) if available else '',
-                'size': size, 'message': self.message if available else 'Janela AnyDesk indisponível, minimizada ou sessão bloqueada.',
+                'size': size, 'message': ('O AnyDesk não está respondendo. Reinicie o aplicativo no Windows antes de retomar o controle.' if hung else self.message if available else 'Janela AnyDesk indisponível, minimizada ou sessão bloqueada.'),
                 'remote_state': 'unverified',
                 'selected_window': str(self.hwnd) if self.hwnd else '',
                 'windows': [{'id': str(h), 'title': win32gui.GetWindowText(h)} for h in self.candidates]}

@@ -78,6 +78,25 @@ falhe, preserva as sessões e informa o erro, sem tentar elevar privilégios.
 O prompt de `tscon /password:*` encerrou imediatamente no SSH durante teste,
 por isso foi substituído por leitura explícita e chamada à API Windows. A
 transferência autenticada foi confirmada em 2026-11-06: `console TI-IT 1 Ativo`.
-A captura pelo portal ainda não recebeu frames nessa condição, mesmo após
-reiniciar o capturador; não considerar a solução completa. O túnel supervisionado e a ponte existentes continuam
+No teste seguinte, o transporte entregou 85 frames em 12 segundos, porém a
+imagem era totalmente preta. Uma janela de diagnóstico colorida foi capturada
+corretamente no mesmo console. A captura do AnyDesk ainda não foi validada com
+conteúdo útil; não considerar a solução completa. O túnel supervisionado e a ponte existentes continuam
 necessários. A reconexão RDP pode voltar a mover a sessão para fora do console.
+
+### Janela AnyDesk sem resposta no console
+
+Na investigação de 2026-11-06, a janela em primeiro plano passou a ter classe
+`Ghost` e título `AnyDesk (Não está respondendo)`. O Windows havia substituído
+uma interface travada, enquanto o capturador ainda entregava quadros pretos da
+janela original. Uma janela temporária de diagnóstico foi capturada com cores
+no mesmo console, isolando a falha observada ao AnyDesk, sem estabelecer a causa
+interna do travamento.
+
+A ponte agora verifica `IsHungAppWindow`, suspende captura e controle e informa
+que o aplicativo não responde. Teste de regressão observado falhando antes da
+correção e passando depois; suíte Windows: 26 testes aprovados. Reiniciar as
+interfaces da sessão e depois o serviço AnyDesk não resolveu o travamento no
+console. O teste temporário da preferência DirectDraw foi desfeito. Não afirmar
+que o acesso independente de RDP está pronto. Captura e controle remoto de ponta
+a ponta continuam pendentes nessa configuração.

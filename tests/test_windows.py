@@ -73,3 +73,15 @@ class WindowsTests(unittest.TestCase):
             agent.activate()
             self.assertTrue(agent.armed)
             self.assertEqual(foreground[0], 123)
+
+    def test_unresponsive_anydesk_cannot_be_captured_or_controlled(self):
+        agent = self.agent()
+        agent.hwnd, agent.pid = 123, 456
+        agent.candidates = [123]
+        agent.armed = True
+        with patch.object(agent, '_choose'), patch.object(agent, '_desktop_ready', return_value=True), patch('bridge.windows.win32gui.IsWindowVisible', return_value=True), patch('bridge.windows.win32gui.IsIconic', return_value=False), patch('bridge.windows.win32gui.GetWindowText', return_value='AnyDesk'), patch('bridge.windows.win32gui.GetClientRect', return_value=(0, 0, 100, 100)), patch('bridge.windows.user32.IsHungAppWindow', return_value=True):
+            status = agent.status()
+            self.assertFalse(status['available'])
+            self.assertFalse(status['armed'])
+            self.assertIn('respondendo', status['message'])
+            self.assertIsNone(agent.frame())
