@@ -1,6 +1,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const canvas = $('screen'), ctx = canvas.getContext('2d');
+let available = null;
 let ws, metadata, geometry, openedAt = 0, lastFrame = 0, armed = false, timer, moving = false, pendingMove;
 function message(text, error = false) { $('message').textContent = text; $('message').classList.toggle('error', error); }
 function setArmed(value) { armed = value; canvas.classList.toggle('control', value); $('control-tag').classList.toggle('active', value); $('control-tag').textContent = value ? 'Controle ativo' : 'Somente visualização'; $('release').disabled = !value; }
@@ -14,15 +15,18 @@ async function api(path, body) {
 function showWorkspace() { $('login-panel').hidden=true; $('workspace').hidden=false; openPreview(); }
 function openPreview() {
  if(ws && ws.readyState<2) return;
+ available = null; lastFrame = 0;
  $('preview').hidden=true; $('transport-label').textContent='Abrindo ponte…';
  const current=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`); ws=current; current.binaryType='blob';
- current.onopen=()=>{openedAt=performance.now(); $('transport-label').textContent='Ponte ativa'; $('transport-dot').style.background='var(--green)'; $('disconnect').disabled=false; timer=setInterval(()=>{send({type:'ping'});if(!lastFrame && performance.now()-openedAt>8000){blank('O Windows não enviou imagem','Verifique se a sessão gráfica está ativa e o AnyDesk está visível. O controle fica suspenso até recebermos uma imagem.');$('activate').disabled=true;}if(lastFrame && performance.now()-lastFrame>2500){release();blank('Imagem interrompida','Confira se a sessão Windows está ativa e o AnyDesk está visível.');}},500); };
+ current.onopen=()=>{openedAt=performance.now(); $('transport-label').textContent='Ponte ativa'; $('transport-dot').style.background='var(--green)'; $('disconnect').disabled=false; timer=setInterval(()=>{send({type:'ping'});if(available !== false && !lastFrame && performance.now()-openedAt>8000){blank('O Windows não enviou imagem','Verifique se a sessão gráfica está ativa e o AnyDesk está visível. O controle fica suspenso até recebermos uma imagem.');$('activate').disabled=true;}if(lastFrame && performance.now()-lastFrame>2500){release();blank('Imagem interrompida','Confira se a sessão Windows está ativa e o AnyDesk está visível.');}},500); };
  current.onmessage=async event=>{
   if(current!==ws) return;
   if(typeof event.data==='string') {
    const data=JSON.parse(event.data);
    if(data.type==='frame'){metadata=data;return;}
    if(data.type==='status') {
+    if(available === false && data.available) openedAt=performance.now();
+    available=Boolean(data.available);
     if(data.windows){const select=$('window-choice');const items=data.windows;const signature=JSON.stringify(items);if(select.dataset.signature!==signature){select.replaceChildren(new Option('Selecione uma janela…',''),...items.map(w=>new Option(w.title||'AnyDesk',w.id)));select.dataset.signature=signature;}select.value=data.selected_window||'';}
 
     $('activate').disabled=!data.available || !lastFrame || performance.now()-lastFrame>2000; setArmed(Boolean(data.armed));
