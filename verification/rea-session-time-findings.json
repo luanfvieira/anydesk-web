@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-06",
+  "artifact_sha256": "559e7c89709a2b585113144afc0c83f206d278879cdb6d891d36e4ed4a5e88d8",
+  "scope": "Read-only static analysis of selected native code regions; correlation with existing native logs",
+  "evidence": {
+    "time-banner-function-0": "ev_5575d004544d972cc476c1621e792546be3fb5b096cf149c1f4b53a06ae5f6f4",
+    "time-banner-function-1": "ev_a6e8bb26e34a1de68888ce62afd74e8073f8e203106c29b8ec8896c48f2a7105",
+    "time-banner-xrefs": "ev_e14d87419220066754f41f4425cff6538e7dd9e3fcfa16d571434a6ccae90c94",
+    "time-check-callers": "ev_3090c1f22c64f2e897671db5e154665dff421713096dcde550b6466d5c4f587d",
+    "time-config-callers": "ev_e94bd73a6a2fe6079a9a4dca88f9de53b0e803cacabbc828f1ef6d2a6164d558",
+    "time-countdown-function-0": "ev_5a4fa447e1b0f6e38e420ef971c3ae8fd16e03111717afcf82a6ebfe506f6708",
+    "time-countdown-function-1": "ev_4b559ba9ecb6479d7c87a4e623e1f2ae5c953fcea802271831bfef1d4c7d0685",
+    "time-countdown-function-2": "ev_642292298d9c1baff7ad2537ae30f93266219c75f5ac17575a093e7a7c5c03f2",
+    "time-countdown-xrefs": "ev_a4a062a35b399554632e5aa6168b1a75ccbc888cb75010bb63821ef6b40b3250",
+    "time-duration-function-0": "ev_45ec5215a5186119c3de69dce312a1b63445d86f45773bd3cbb2a22ae5d57b9a",
+    "time-duration-function-1": "ev_005222b703aac0672ccab227f907ad5a9c935d5f6942533f30e6fd6c7a763034",
+    "time-duration-function-2": "ev_5de6858affe9aaa353ea67560aeb82758729a9f4ea515a2c1b44d4c417cbf419",
+    "time-duration-function-3": "ev_d4a5f6de6a0b7d5fad3c51449bde697d5d29c022fb86d89bf4c32b394a63bf67",
+    "time-duration-xrefs": "ev_46609a74fdc22f6a0dbffc64e74771e52d13aba237371bba41ad7b5db644273d",
+    "time-follow-0x11d74a0": "ev_dd8c07b48841ca38723ec3f97ea0ae28278edaddc44576ff9fced99b6d0c4c00",
+    "time-follow-0x122c310": "ev_a1d1fe19664f00bcb3828127a5489cbfe910e4f2c42b53adfe0bc88c6c1b00d3",
+    "time-pseudo-0x1182e60": "ev_91d54856195f765376975061d83c2d64ed97d168549984b5e24c54d93c073693",
+    "time-pseudo-0x11d9040": "ev_f70bcf0e5aad6f244e7cab6be915dbd14505cb3708550bd951fa17e725f7e9ee",
+    "time-pseudo-0x122aa90": "ev_6d47bfb8a710d43837c60f6dff819bca8fac8fc7155a79f24c1368f47ce01d52",
+    "time-pseudo-0x122ab10": "ev_a0376895283b88d27d514444b9404c618ed908be01d244fd51f7d37704a71fe8",
+    "time-pseudo-0x122b2b0": "ev_56e237ab2bd9579cb770a73087aa4ebefde8c0c1c5414d99787ca8edfe00641f",
+    "time-pseudo-0xf46840": "ev_3dc6f63765b0d6eaa45594def3cd3e8b6b47537308f1333a4c812ce1e0193f1b",
+    "time-follow-0x11d5260": "ev_c11c8e760001dae245b2052ca04cc8c2a365e6983a0439fc279fb35a17030e2c"
+  },
+  "observed_session_durations_seconds": [
+    300.901,
+    300.083
+  ],
+  "installed_binary_modified": false,
+  "limitations": [
+    "Static analysis is not a runtime trace of these functions.",
+    "No proof of the ultimate source of the effective timeout value or independent relay enforcement.",
+    "Missing code regions, writable data and calling conventions limit interpretation.",
+    "Empty caller references are bounded to the selected artifact and do not rule out indirect calls.",
+    "Final callback and ultimate source of the timeout value have not been traced completely."
+  ],
+  "traced_chain": [
+    "FUN_011d9040",
+    "FUN_011d74a0",
+    "FUN_011d5260"
+  ],
+  "next_unresolved_callback": "FUN_011d4f60"
+}

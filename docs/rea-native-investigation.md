@@ -157,3 +157,49 @@ relay durante a inspeção. Também existem falhas de resolução de
 `crl.anydesk.com`, mas não foi demonstrada relação causal com esse aviso offline.
 Resumo sanitizado: `verification/offline-id-comparison.json`. Nenhum código da
 ponte, configuração de rede ou binário AnyDesk foi alterado nesta etapa.
+
+## Rastreamento do prazo de sessão (2026-11-06)
+
+A investigação é somente de leitura: nenhuma alteração no executável instalado,
+na licença ou nos arquivos de configuração. O novo artefato inclui regiões de
+código escolhidas pelas referências aos parâmetros de tempo. Sua proveniência
+está em `verification/rea-session-time-provenance.json`; pseudocódigo integral
+permanece fora do Git. Endereços abaixo pertencem à base capturada, não são
+endereços estáveis para outra versão ou execução.
+
+O REA/Ghidra confirmou quatro referências a `ad.license.info.session_timeout`,
+três à chave de contagem regressiva e duas ao texto de aviso de prazo próximo.
+A leitura das funções recuperadas permite distinguir:
+
+| Função atribuída pelo analisador | Evidência e interpretação |
+| --- | --- |
+| `FUN_0122aa90` | Consulta o parâmetro de prazo e faz uma conversão numérica. |
+| `FUN_0122ab10` | Consulta separadamente o parâmetro da contagem regressiva. |
+| `FUN_011d9040` | Compara uma duração calculada com um valor obtido pelo caminho de relógio; no ramo excedido atualiza estado/motivo e chama `FUN_011d74a0`. Também atualiza o aviso em outro caminho. |
+| `FUN_011d74a0` | Encaminha uma ação associada a `FUN_011d5260`, diretamente ou pela fila da thread correspondente. |
+| `FUN_00f46840` | Escolhe textos de aviso e utiliza o marcador `TIME_LEFT`; é um caminho de apresentação separado. |
+| `FUN_0122c310` / `FUN_0122b2b0` | Consultam e convertem valores de propriedades com sincronização. A segunda trata especialmente as chaves de prazo, mas a origem final do valor efetivo não está demonstrada. |
+| `FUN_01182e60` | Inclui as chaves de prazo entre várias propriedades de licença. A presença nessa estrutura não prova uma resposta de servidor. |
+
+Os logs independentes mostram duas sessões interrompidas aproximadamente cinco
+minutos depois de iniciadas: 300,901 e 300,083 segundos até `Stopping session`.
+Em ambas, o encerramento e o fechamento do IPC precedem o diálogo de limitação
+de licença. Isso separa o efeito visual do término da sessão.
+
+Não foram encontradas as duas chaves de prazo persistidas nos arquivos verificados
+`ProgramData/AnyDesk/{service,system}.conf` e
+`Users/ti-it/AppData/Roaming/AnyDesk/{user,system}.conf`. Essa busca é limitada a
+esses arquivos; não demonstra que o valor inexista em memória ou em outro local.
+
+**Conclusão sustentada:** existe lógica no cliente relacionada ao prazo, separada
+do texto do aviso. **Ainda não demonstrado:** quem fornece o prazo efetivo, se a
+rede impõe um limite adicional, e se uma mudança local manteria a sessão. Não foi
+feito teste de remoção de limite. As referências e identificadores de evidência
+estão em `verification/rea-session-time-findings.json`.
+
+Seguimento confirmado: `FUN_011d5260` altera um estado interno e encaminha outra
+ação associada a `FUN_011d4f60`, ou chama uma operação virtual conforme o estado
+atual. Esse último destino e as chamadas indiretas ainda não foram resolvidos.
+Portanto, a cadeia foi rastreada até a transição de estado/encaminhamento; não
+se declara um rastreamento completo até o fechamento final do transporte.
+As sessões REA abertas nesta etapa foram fechadas normalmente.

@@ -1,0 +1,29 @@
+{
+  "parent_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+  "artifact_sha256": "559e7c89709a2b585113144afc0c83f206d278879cdb6d891d36e4ed4a5e88d8",
+  "retained_code_ranges": [
+    {
+      "start": "0xf40000",
+      "end_exclusive": "0xf50000"
+    },
+    {
+      "start": "0x1180000",
+      "end_exclusive": "0x1188000"
+    },
+    {
+      "start": "0x11d0000",
+      "end_exclusive": "0x11e0000"
+    },
+    {
+      "start": "0x1220000",
+      "end_exclusive": "0x1230000"
+    },
+    {
+      "start": "0x16e0000",
+      "end_exclusive": "0x16f0000"
+    }
+  ],
+  "limitations": [
+    "Selected code only; absent callees and prior writable-data omissions remain. Analysis artifact, not runnable."
+  ]
+}
