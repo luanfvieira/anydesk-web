@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-06",
+  "hang": {
+    "class": "Ghost",
+    "report": "AppHangXProcB1",
+    "related_process": "Taskmgr.exe"
+  },
+  "recovery": "Close session Task Manager and restart AnyDesk UI with original configuration",
+  "configuration_restored": true,
+  "console": {
+    "frames": 70,
+    "last_frame_seconds": 9.98,
+    "visual_content_confirmed": true
+  },
+  "subsequent_rdp": {
+    "frames": 86,
+    "last_frame_seconds": 11.94,
+    "max_gap_seconds": 0.34,
+    "activation_confirmed": true,
+    "input_sent": false
+  },
+  "remote_end_to_end_input_verified": false,
+  "windows_rebooted": false
+}

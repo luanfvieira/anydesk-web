@@ -2,7 +2,7 @@
 
 Interface local para usar o AnyDesk do Windows TI-LOCAL pelo navegador do Mac. O AnyDesk original faz a conexão remota; este projeto transmite somente sua janela e encaminha entrada com verificação de foco. Não é um cliente independente do protocolo AnyDesk.
 
-**Estado:** interface, autenticação, transmissão real da janela e ativação do controle na ponte validadas; 25 testes passaram no Windows e o teste de navegador confirmou imagem real, login e logout. A última tentativa para o destino informado mostrou “Dispositivo Offline”. Mouse/teclado de ponta a ponta ainda dependem de o destino voltar a ficar online e aceitar a conexão; não foram declarados validados.
+**Estado:** interface, autenticação, transmissão real da janela e ativação do controle na ponte validadas; 26 testes passaram no Windows e o teste de navegador confirmou imagem real, login e logout. A última tentativa para o destino informado mostrou “Dispositivo Offline”. Mouse/teclado de ponta a ponta ainda dependem de o destino voltar a ficar online e aceitar a conexão; não foram declarados validados.
 
 O REA 6.5.0 foi usado para inspecionar o AnyDesk instalado. A ponte usa o aplicativo original e APIs de janela do Windows, sem reconstruir seu protocolo. A captura inicial com PrintWindow falhou no conteúdo; a versão atual usa Windows Graphics Capture por HWND exato.
 
@@ -57,7 +57,7 @@ Projeto aprovado: `docs/specs/2026-11-05-anydesk-web-bridge-design.md`.
 
 O Windows registrou desconexões RDP com `0x80070040` (transporte de rede indisponível); isso não determina sozinho se houve suspensão, fechamento do cliente ou falha de rede. A ponte continuava escutando em loopback. O túnel SSH anterior estava ausente, sem registro que estabelecesse a causa de sua saída. O gerenciador macOS agora mantém o processo fora do terminal, com keepalive e reinício automático. Isso não reconecta RDP, não desbloqueia o Windows e não reativa controle remoto automaticamente. Se a prévia desconectar, use **Reabrir prévia** ou atualize a página após o túnel voltar.
 
-### Preparar uso sem RDP (captura em validação)
+### Preparar uso sem RDP (captura no console validada)
 
 A ponte também pode usar uma sessão gráfica no console local. A transferência
 precisa ser autorizada pelo Windows e faz a área de trabalho aparecer no monitor
@@ -78,25 +78,36 @@ falhe, preserva as sessões e informa o erro, sem tentar elevar privilégios.
 O prompt de `tscon /password:*` encerrou imediatamente no SSH durante teste,
 por isso foi substituído por leitura explícita e chamada à API Windows. A
 transferência autenticada foi confirmada em 2026-11-06: `console TI-IT 1 Ativo`.
-No teste seguinte, o transporte entregou 85 frames em 12 segundos, porém a
-imagem era totalmente preta. Uma janela de diagnóstico colorida foi capturada
-corretamente no mesmo console. A captura do AnyDesk ainda não foi validada com
-conteúdo útil; não considerar a solução completa. O túnel supervisionado e a ponte existentes continuam
-necessários. A reconexão RDP pode voltar a mover a sessão para fora do console.
+A captura com conteúdo real foi confirmada no console em 2026-11-06 depois de
+resolver um travamento do AnyDesk: 70 frames em aproximadamente 12 segundos,
+com inspeção visual da tela inicial. O túnel supervisionado e a ponte continuam
+necessários. A reconexão pelo Windows App move a sessão novamente para o RDP;
+feche esse cliente antes de preparar o console para uso exclusivo do portal.
+O teste posterior de ativação (`armed=true`, seguido de liberação) ocorreu no
+RDP, que havia reconectado. Mouse/teclado em um destino remoto continuam pendentes.
 
 ### Janela AnyDesk sem resposta no console
 
 Na investigação de 2026-11-06, a janela em primeiro plano passou a ter classe
-`Ghost` e título `AnyDesk (Não está respondendo)`. O Windows havia substituído
-uma interface travada, enquanto o capturador ainda entregava quadros pretos da
-janela original. Uma janela temporária de diagnóstico foi capturada com cores
-no mesmo console, isolando a falha observada ao AnyDesk, sem estabelecer a causa
-interna do travamento.
+`Ghost` e título `AnyDesk (Não está respondendo)`. Uma janela de diagnóstico foi
+capturada com cores na mesma sessão, enquanto o AnyDesk entregava imagens pretas.
 
-A ponte agora verifica `IsHungAppWindow`, suspende captura e controle e informa
-que o aplicativo não responde. Teste de regressão observado falhando antes da
-correção e passando depois; suíte Windows: 26 testes aprovados. Reiniciar as
-interfaces da sessão e depois o serviço AnyDesk não resolveu o travamento no
-console. O teste temporário da preferência DirectDraw foi desfeito. Não afirmar
-que o acesso independente de RDP está pronto. Captura e controle remoto de ponta
-a ponta continuam pendentes nessa configuração.
+O relatório Windows Error Reporting (`AppHangXProcB1`, evento 1001 às 13:55:19 UTC)
+indicou bloqueio do AnyDesk envolvendo `Taskmgr.exe`. Reiniciar o AnyDesk e seu
+serviço, ou iniciar com um `user.conf` temporário, não resolveu. Após encerrar o
+Gerenciador de Tarefas da sessão e reabrir o AnyDesk com a configuração original,
+a imagem normal voltou. Isso sustenta o diagnóstico de bloqueio entre processos;
+a causa interna do bloqueio não foi determinada. A preferência de renderização
+testada foi restaurada, assim como o perfil original (hash conferido).
+
+A ponte verifica `IsHungAppWindow`, suspende captura e controle e informa que o
+aplicativo não responde. Teste de regressão observado falhando antes da correção
+e passando depois; suíte Windows: 26 testes aprovados. A recuperação administrativa
+encerrou as interfaces travadas; não foi adicionado encerramento automático de
+processos ao portal. O Windows não foi reiniciado.
+
+Validação após recuperação: imagem inspecionada em RDP e console, 86 frames em
+12 segundos no último teste RDP, `armed=true` seguido de liberação explícita e
+nenhuma tecla/clique remoto enviado. Não confundir ativação na ponte com teste
+de controle de um computador remoto. Evidência resumida em
+`verification/console-recovery.json`; imagens e credenciais ficam fora do Git.
