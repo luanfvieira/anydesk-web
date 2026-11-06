@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+.runtime/
+verification/*.png
+verification/*.jpg
+*.log

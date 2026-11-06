@@ -1,0 +1,1 @@
+"""AnyDesk browser bridge."""

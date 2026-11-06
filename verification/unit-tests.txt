@@ -1,0 +1,19 @@
+test_coordinates_are_finite_normalized (test_policy.PolicyTests.test_coordinates_are_finite_normalized) ... ok
+test_event_schema_rejects_unknown_and_shell_keys (test_policy.PolicyTests.test_event_schema_rejects_unknown_and_shell_keys) ... ok
+test_geometry_must_be_positive (test_policy.PolicyTests.test_geometry_must_be_positive) ... ok
+test_id_is_only_numeric_address (test_policy.PolicyTests.test_id_is_only_numeric_address) ... ok
+test_auth_and_origin_are_required_for_control (test_server.ServerTests.test_auth_and_origin_are_required_for_control) ... ok
+test_expired_session_cannot_send_input (test_server.ServerTests.test_expired_session_cannot_send_input) ... ok
+test_frame_ack_provides_backpressure (test_server.ServerTests.test_frame_ack_provides_backpressure) ... ok
+test_invalid_id_does_not_reach_process_boundary (test_server.ServerTests.test_invalid_id_does_not_reach_process_boundary) ... ok
+test_login_throttles_and_logout_revokes (test_server.ServerTests.test_login_throttles_and_logout_revokes) ... ok
+test_logout_closes_controller_and_revokes_cookie (test_server.ServerTests.test_logout_closes_controller_and_revokes_cookie) ... ok
+test_malformed_message_rejected_without_crash (test_server.ServerTests.test_malformed_message_rejected_without_crash) ... ok
+test_only_one_controller_and_close_releases (test_server.ServerTests.test_only_one_controller_and_close_releases) ... ok
+test_oversized_message_closes_and_releases (test_server.ServerTests.test_oversized_message_closes_and_releases) ... ok
+test_stale_geometry_rejected (test_server.ServerTests.test_stale_geometry_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.386s
+
+OK

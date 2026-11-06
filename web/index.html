@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ponte · acesso remoto</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><a class="brand" href="/" aria-label="Ponte início"><span class="mark">↗</span>Ponte<span class="brand-sub">ACESSO REMOTO</span></a><span class="host"><i></i> TI-LOCAL <span>· Windows</span></span></header>
+<main>
+<section id="login-panel" class="login-panel">
+ <p class="eyebrow">SEU COMPUTADOR, MAIS PERTO</p><h1>Uma janela para<br>o outro lado.</h1><p class="intro">Acesse o AnyDesk pelo navegador, com a conexão intermediada pelo seu Windows.</p>
+ <form id="login-form"><label for="password">Senha da ponte</label><div class="login-row"><input id="password" type="password" autocomplete="current-password" required placeholder="Digite sua senha"><button class="primary" type="submit">Entrar <span>→</span></button></div><p id="login-error" role="alert"></p></form>
+ <div class="local-note"><span>⌁</span> Acesso local pelo túnel SSH</div>
+</section>
+<section id="workspace" hidden>
+ <div class="page-title"><div><p class="eyebrow">SUA ÁREA DE TRABALHO REMOTA</p><h1>Conecte. Veja. Controle.</h1></div><button id="logout" class="quiet">Sair da ponte</button></div>
+ <div class="layout"><aside>
+  <div class="card"><span class="step">01 / DESTINO</span><h2>Qual computador?</h2><p>Informe o ID exibido no AnyDesk do computador que você quer acessar.</p><form id="connect-form"><label for="remote-id">ID AnyDesk</label><input id="remote-id" inputmode="numeric" pattern="[0-9 ]{6,24}" required placeholder="123 456 789" autocomplete="off"><button type="submit" class="primary wide">Solicitar conexão <span>↗</span></button></form><div class="hint">A conexão precisa ser aceita no computador remoto.</div></div>
+  <div class="card compact"><span class="step">02 / CONTROLE</span><h2>Você no comando</h2><p>Ative o controle e clique na imagem para usar mouse e teclado.</p><button id="activate" class="secondary wide" disabled>Ativar controle</button><button id="release" class="quiet wide" disabled>Pausar controle</button><p class="hint">O mouse e o foco também mudam na sessão <strong>ti-it</strong> do Windows.</p></div>
+  <div class="connection-info"><i id="transport-dot"></i><div><strong id="transport-label">Abrindo ponte…</strong><span>TI-LOCAL · 10.0.2.141</span></div></div>
+ </aside>
+ <section class="viewer"><div class="viewer-toolbar"><div><span class="live-dot" id="live-dot"></span><strong id="viewer-title">Janela do AnyDesk</strong><span class="tag" id="control-tag">Somente visualização</span></div><button id="fullscreen" class="icon-button" title="Tela cheia" aria-label="Tela cheia">⛶</button></div>
+  <div id="stage" class="stage"><canvas id="screen" tabindex="0" aria-label="Imagem do AnyDesk. Ative o controle para usar mouse e teclado."></canvas><div id="empty" class="empty"><span>↗</span><h2 id="empty-title">Preparando a janela</h2><p id="empty-text">A imagem real do AnyDesk aparecerá aqui.</p><button id="preview" class="secondary" hidden>Reabrir prévia</button></div></div>
+  <div class="viewer-footer"><span id="frame-info">Aguardando imagem</span><button id="disconnect" class="danger" disabled>Desconectar</button></div>
+  <div id="message" class="message" role="status" aria-live="polite">Nenhuma conexão remota iniciada.</div>
+  <p class="viewer-note">A imagem mostra o estado real do AnyDesk. A ponte não confirma automaticamente se o destino aceitou a conexão.</p>
+ </section></div>
+</section>
+</main><footer><span>Ponte <span class="muted">/ AnyDesk via Windows</span></span><span>Prévia local · imagem e controle</span></footer>
+</body></html>
