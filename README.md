@@ -51,4 +51,4 @@ node --check web/app.js
 
 O limite do sistema operacional é substituído por um adaptador de teste na suíte HTTP. Isso verifica autenticação, exclusividade, validação e limpeza, **não prova captura ou controle reais**. `scripts/probe_windows.py` testa a captura dentro da sessão Windows; `scripts/check_browser.py` verifica navegador e túnel usando uma cópia local da credencial. Este último exige Playwright e o Google Chrome no Mac. Os testes não iniciam uma conexão AnyDesk remota.
 
-Projeto aprovado: `../docs/superpowers/specs/2026-11-05-anydesk-web-bridge-design.md`.
+Projeto aprovado: `docs/specs/2026-11-05-anydesk-web-bridge-design.md`.

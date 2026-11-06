@@ -1,4 +1,4 @@
-# Execution ledger — plan: ../docs/superpowers/plans/2026-11-05-anydesk-web-bridge.md
+# Execution ledger — plan: docs/plans/2026-11-05-anydesk-web-bridge.md
 
 - User approved design and use of ti-it graphical session.
 - Ruling: execute inline following existing approval; no extra execution-method approval needed under session autonomy instructions.
@@ -29,3 +29,6 @@
 - Task 2: complete, authenticated transport and lifecycle regression suite green.
 - Task 3: deployed locally on Windows with retained SSH tunnel and browser QA. End-to-end remote control remains pending target availability.
 - No deferred Minor review findings. Changes retained on local feature branch; no remote repository or public publication.
+
+- GitHub destination requested by user: luanfvieira/anydesk-web, using marcoscruz-dev. Matching collaborator invitation accepted. Runtime credentials/images remain excluded from Git.
+- Next validation: when the authorized destination is online, accept a connection and test remote mouse/keyboard end to end. Do not treat bridge armed=true as proof of remote OS input.
