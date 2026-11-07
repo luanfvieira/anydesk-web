@@ -235,3 +235,55 @@ foi observada e não evitou o encerramento deste caso.
 Não foi recuperado do pareamento um artefato que remova o prazo. Esta etapa
 correlaciona registros existentes; não decifra tráfego nem captura credenciais.
 Linha do tempo sanitizada: `verification/pairing-timeline.json`.
+
+
+## Origem das propriedades e atualização da licença
+
+O seguimento estático distingue a configuração base de um mapa adicional recebido
+pela sessão. `FUN_0122b0b0` atualiza a referência base em `+0x48`, enquanto
+`FUN_0122b130` atualiza o mapa em `+0x50`. Os deslocamentos foram conferidos em
+assembly. O getter `FUN_0122b2b0` consulta essas fontes e trata especialmente as
+propriedades de prazo; localizar uma chave em um arquivo não estabelece sozinho
+o valor efetivamente usado pela sessão.
+
+Os handlers `FUN_011d27b0`, `FUN_011db530`, `FUN_011d6420` e os caminhos do outro
+lado em `FUN_01179dc0` / `FUN_0117d5d0` aplicam mapas de mensagens. Os caminhos
+`FUN_011da9f0` e `FUN_0117f7b0` obtêm uma configuração base, exportam propriedades
+e encaminham uma mensagem. Portanto, a análise não se limita ao pareamento
+inicial: existem caminhos para atualizar propriedades com a sessão aberta.
+Isso não identifica, por si só, um servidor como autor do valor de cinco minutos.
+
+O construtor `FUN_012c5430`, identificado pelo literal `license_adapter`, chama
+`FUN_012c7c40` para carregar `ad.license.state_store`; `FUN_012c79f0` serializa esse
+estado. A chave existe no `service.conf` verificado no Windows. O valor integral
+não foi publicado nem alterado, e não se afirma que contenha o prazo de sessão.
+A ausência das chaves de timeout em texto claro, registrada anteriormente, não
+exclui esse estado persistido ou propriedades recebidas em memória.
+
+`FUN_012c6580` também contém um agendamento com crescimento quadrático limitado
+a 300 e conversão por 1000. O contexto é de tentativas de atualização de licença;
+essa constante não foi identificada como o prazo que encerra a sessão. Não se
+deve confundir uma ocorrência numérica de 300 com a causa dos 300 segundos
+observados nos logs.
+
+O vínculo final entre a resposta de licença, a configuração base e o valor
+efetivo ainda está parcialmente rastreado. Não foi demonstrada uma forma de
+remover o limite, nem realizada alteração no executável ou no estado da licença.
+As evidências sanitizadas, hashes dos recortes e limitações estão em
+`verification/rea-license-source-findings.json`.
+
+
+O seguimento de `FUN_012c7770` mostra a inicialização do perfil `Free-1` e o
+preenchimento de seu mapa pela enumeração de `FUN_01182e60`, consultando um
+provedor de configuração. Um literal incorporado em `0x1c35528` contém valores
+zero para timeout e countdown. Isso é evidência de conteúdo do binário, não de
+valores ativos: não explica sozinho as sessões encerradas em cinco minutos.
+
+`FUN_012c8130` chama `0x13a0170` e, em um ramo condicionado ao resultado, substitui
+campos e mapas do objeto de licença; compara o estado anterior e publica uma
+notificação quando há diferenças. `FUN_012c6ca0` obtém um objeto por `0x12c5a30`
+e o distribui por chamadas a `0x120e040`. O próximo elo concreto é resolver
+`0x13a0170` e a seleção em `0x12c5a30`, vinculando um campo de resposta ao getter
+do prazo. Não se atribui a resposta a um servidor específico sem esse vínculo.
+A rodada de cinco funções foi concluída e o comando de fechamento do REA foi
+executado; nenhuma conexão remota de teste foi iniciada nessa rodada.

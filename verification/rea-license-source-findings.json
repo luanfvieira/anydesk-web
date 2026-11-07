@@ -1,0 +1,247 @@
+{
+  "date": "2026-11-06",
+  "scope": "Read-only source tracing of effective session timeout; no patch or license-state changes.",
+  "artifacts": {
+    "properties": {
+      "parent_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+      "artifact_sha256": "e7e5b0aa249b78185e9cf6f520fbb2690912673325f77767028039f38304c4b7",
+      "retained_code_ranges": [
+        {
+          "start": "0xeb5000",
+          "end_exclusive": "0xec0000"
+        },
+        {
+          "start": "0xf20000",
+          "end_exclusive": "0xf30000"
+        },
+        {
+          "start": "0xf50000",
+          "end_exclusive": "0xf60000"
+        },
+        {
+          "start": "0x1180000",
+          "end_exclusive": "0x1188000"
+        },
+        {
+          "start": "0x11d0000",
+          "end_exclusive": "0x11e0000"
+        },
+        {
+          "start": "0x1220000",
+          "end_exclusive": "0x1230000"
+        },
+        {
+          "start": "0x1410000",
+          "end_exclusive": "0x1450000"
+        },
+        {
+          "start": "0x16e0000",
+          "end_exclusive": "0x1700000"
+        }
+      ],
+      "limitations": [
+        "Selected code only; absent callees and prior writable-data omissions remain. Analysis artifact, not runnable."
+      ]
+    },
+    "negotiation": {
+      "parent_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+      "artifact_sha256": "55033c05f8f484cada7e8a0377d53d8382c47757f9c4ef650c432accd0979144",
+      "retained_code_ranges": [
+        {
+          "start": "0xeb5000",
+          "end_exclusive": "0xec0000"
+        },
+        {
+          "start": "0xf20000",
+          "end_exclusive": "0xf30000"
+        },
+        {
+          "start": "0xf50000",
+          "end_exclusive": "0xf60000"
+        },
+        {
+          "start": "0x1170000",
+          "end_exclusive": "0x1188000"
+        },
+        {
+          "start": "0x11d0000",
+          "end_exclusive": "0x11e0000"
+        },
+        {
+          "start": "0x1220000",
+          "end_exclusive": "0x1230000"
+        },
+        {
+          "start": "0x1410000",
+          "end_exclusive": "0x1450000"
+        },
+        {
+          "start": "0x16e0000",
+          "end_exclusive": "0x1700000"
+        }
+      ],
+      "limitations": [
+        "Selected code only; absent callees and prior writable-data omissions remain. Analysis artifact, not runnable."
+      ]
+    },
+    "backend": {
+      "parent_sha256": "c9e8abc06345d32864f6b80ee47d64a09804b18d1e2bf43c0337449a564c9667",
+      "artifact_sha256": "895057f4ba4488abe95521d41e26844252944e0ab5e0217c193be474285dab04",
+      "retained_code_ranges": [
+        {
+          "start": "0xeb5000",
+          "end_exclusive": "0xec0000"
+        },
+        {
+          "start": "0xf20000",
+          "end_exclusive": "0xf30000"
+        },
+        {
+          "start": "0xf50000",
+          "end_exclusive": "0xf60000"
+        },
+        {
+          "start": "0x1170000",
+          "end_exclusive": "0x1188000"
+        },
+        {
+          "start": "0x11d0000",
+          "end_exclusive": "0x11e0000"
+        },
+        {
+          "start": "0x1220000",
+          "end_exclusive": "0x1230000"
+        },
+        {
+          "start": "0x12c0000",
+          "end_exclusive": "0x12d0000"
+        },
+        {
+          "start": "0x1370000",
+          "end_exclusive": "0x1380000"
+        },
+        {
+          "start": "0x1410000",
+          "end_exclusive": "0x1450000"
+        },
+        {
+          "start": "0x16e0000",
+          "end_exclusive": "0x1700000"
+        }
+      ],
+      "limitations": [
+        "Selected code only; absent callees and prior writable-data omissions remain. Analysis artifact, not runnable."
+      ]
+    }
+  },
+  "findings": [
+    {
+      "private_evidence_file": "property-asm-0x122b0b0.json",
+      "evidence_id": "ev_fd31db120eebfbee6151daaa7a6bedffd4286eeec3f7ca7e09d4cd637c059e68",
+      "observation": "Atualiza referência de configuração base em +0x48.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "property-asm-0x122b130.json",
+      "evidence_id": "ev_669f4815b10ed5ab5c988d45ebccc0287dcba74019163891412fa43431ea1ed0",
+      "observation": "Atualiza mapa adicional em +0x50 sob sincronização.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "property-pseudo-0x11d27b0.json",
+      "evidence_id": "ev_f31f889a2967ac95ab4feee4bf83fb668437e78f7e8f8c62a4c47dfea0082f68",
+      "observation": "Handler aplica mapa de propriedades da mensagem inicial conforme flag.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "negotiation-pseudo-0x11db530.json",
+      "evidence_id": "ev_1afec2c159df0560159ca4af787768f1ef05c14a7040ffc28959d0edd9f1588d",
+      "observation": "Handler aplica mapa da mensagem de atualização.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "negotiation-pseudo-0x117d5d0.json",
+      "evidence_id": "ev_84e8aaec39d94412f350c7f5b7219dbd0b13bd8cb990e6707a1938715eda2837",
+      "observation": "Handler do outro lado também aplica atualização de propriedades.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "property-pseudo-0x11da9f0.json",
+      "evidence_id": "ev_8064de1f879a2771346b7af12fc26e62ae3a0435a3a2dd20ebf7d7506ad70627",
+      "observation": "Obtém configuração base, exporta propriedades e encaminha mensagem.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "negotiation-pseudo-0x117f7b0.json",
+      "evidence_id": "ev_e6add71f82607ac15ca054c81afda43d4db00c9b24a46c7e91f4f26f3817a1b0",
+      "observation": "Caminho equivalente de exportação e envio do outro lado.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "backend-pseudo-0x12c5430.json",
+      "evidence_id": "ev_822f16860544469842c3de18c0ad14c2480563c512a851d255a6497ca2d12696",
+      "observation": "Construtor identificado pelo literal license_adapter carrega estado persistido.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "backend-pseudo-0x12c79f0.json",
+      "evidence_id": "ev_acea668742eea3b6fdcd2c93549f84e0f62f92608e58f1381e5a8896405a09a3",
+      "observation": "Serializa estado para ad.license.state_store.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "backend-pseudo-0x12c7c40.json",
+      "evidence_id": "ev_f926617f1998fc2fd9907dc2d309e4fb2ffa4eea78ef7c981d9cb95e35b03c8d",
+      "observation": "Lê e interpreta ad.license.state_store.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "backend-pseudo-0x12c6580.json",
+      "evidence_id": "ev_4c425c4a35b11c59d2a0a4cd53abe65acef3d79a49addf6be49223d7b33b8806",
+      "observation": "Despacha eventos e contém agendamento de novas tentativas com crescimento quadrático limitado a 300; não identificado como duração da sessão.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "followup-pseudo-0x12c7770.json",
+      "evidence_id": "ev_297e254f886cae710da3c2c25d35ca3af42fdc564af0c7fc1eb4fb620973955c",
+      "observation": "Inicializa perfil Free-1; enumera propriedades de licença e consulta um provedor de configuração para preencher mapa.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "followup-pseudo-0x12c8130.json",
+      "evidence_id": "ev_bf2bb5ec2fa4375f4312c47371d94c8d3f3e58fe47c703e741b152afae6fc60b",
+      "observation": "Após chamada a 0x13a0170, em ramo condicionado ao resultado, substitui campos/mapas do objeto de licença e emite notificação quando detecta mudanças; origem remota e campo de timeout ainda não demonstrados.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "followup-pseudo-0x12c6ca0.json",
+      "evidence_id": "ev_7a727e24154e1bf8be5891de2f932fe95587eee61b89527f13b8ed01c0056385",
+      "observation": "Obtém objeto via 0x12c5a30 e encaminha-o por múltiplas chamadas de distribuição 0x120e040.",
+      "type": "static_analysis"
+    },
+    {
+      "private_evidence_file": "property-license-strings.json",
+      "evidence_id": "ev_117927fb4a0a52bc1c039cfc8c3284b1f64fca6174ee76d590085ca9030ee28e",
+      "observation": "Literal de configuração em 0x1c35528 contém session_timeout=0 e session_timeout_countdown=0; não prova valores ativos na sessão observada.",
+      "type": "static_analysis"
+    }
+  ],
+  "unknowns": [
+    "Origem definitiva do valor efetivo de cinco minutos.",
+    "Conteúdo semântico completo do estado persistido.",
+    "Eventual imposição adicional do prazo por outro dispositivo ou serviço.",
+    "Efeito de qualquer alteração local sobre a manutenção da sessão."
+  ],
+  "limitations": [
+    "Sparse analysis artifacts omit writable pages and some callees.",
+    "Decompiler calling conventions and prototypes are imperfect; offsets corroborated with assembly where available.",
+    "Static analysis does not establish observed runtime execution or server attribution.",
+    "Private evidence remains ignored; this record contains summaries and identifiers only."
+  ],
+  "next_trace": {
+    "response_processing": "0x13a0170",
+    "license_object_selection": "0x12c5a30",
+    "configuration_provider": "virtual call through service configuration interface",
+    "required_proof": "Tie response field or provider result to active session_timeout value; static presence of a default is insufficient."
+  }
+}
